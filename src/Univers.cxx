@@ -193,25 +193,22 @@ void Univers::evolution() {
     forces.reserve(nbParticules);
     // Calcul des forces
     for (auto it = cellules.begin(); it != cellules.end(); it++) {
-        std::vector<Particule3D> particules = it->getParticules();
-
-        for (auto it_k = particules.begin(); it_k != particules.end(); it_k++) {
-            std::vector<Particule3D> particules_voisines;
-            Particule3D particule_k = *it_k;
-            Vector3D pos = particule_k.getPos();
-            // parcourir les cellules de la classe Univers
-            for (auto it_l = cellules.begin(); it_l != cellules.end(); it_l++) {
-                Vector3D centre = it_l->getCentre();
-                Vector3D diff = pos - centre;
-                double norme_diff = diff.norm();
-                if (norme_diff < rCut) {
-                    // inserer les particules de it_l dans la liste des particules voisines
-                    std::vector<Particule3D> particules2 = it_l->getParticules();
-                    for (auto it_m = particules2.begin(); it_m != particules2.end(); it_m++) {
-                        particules_voisines.push_back(*it_m);
-                    }
+        int* id = it->getId();
+        std::vector<Particule3D> particules_voisines = it->getParticules();
+        // parcourir les cellules de la classe Univers
+        for (auto it_l = cellules.begin(); it_l != cellules.end(); it_l++) {
+            int* id2 = it_l->getId();
+            if (id[0] == id2[0] + 1 || id[0] == id2[0] -1 || id[1] == id2[1] + 1 || id[1] == id2[1] - 1) {
+                // inserer les particules de it_l dans la liste des particules voisines
+                std::vector<Particule3D> particules2 = it_l->getParticules();
+                for (auto it_m = particules2.begin(); it_m != particules2.end(); it_m++) {
+                    particules_voisines.push_back(*it_m);
                 }
             }
+        }
+
+        std::vector<Particule3D> particules = it->getParticules();
+        for (auto it_k = particules.begin(); it_k != particules.end(); it_k++) {
             
             Vector3D force_ij;
             for (auto it_n = particules_voisines.begin(); it_n != particules_voisines.end(); it_n++) {
@@ -230,8 +227,6 @@ void Univers::evolution() {
                 }
             }
             forces[it_k->getId()] = force_ij;
-            // print force_ij
-            // std::cout << "force_ij = " << force_ij.getX() << " " << force_ij.getY() << " " << force_ij.getZ() << std::endl;                
         }
     }
     
@@ -282,49 +277,52 @@ void Univers::evolution() {
 
         // Calcul des forces
         // forces.clear(); // Clear la liste des forces
-        for (auto it = cellules.begin(); it != cellules.end(); it++) {
-            std::vector<Particule3D> particules = it->getParticules();
+            // parcourir les particules de chaque cellule de la classe Univers
+    for (auto it = cellules.begin(); it != cellules.end(); it++) {
+        std::vector<Particule3D> particules = it->getParticules();
+        for (auto it = particules.begin(); it != particules.end(); it++) {
+            // stocker chaque force à la id-ième position de la liste des forcesOld
+            forcesOld[it->getId()] = it->getForce();
+        }
+    }
+    std::vector<Vector3D> forces;
+    forces.reserve(nbParticules);
+    // Calcul des forces
+    for (auto it = cellules.begin(); it != cellules.end(); it++) {
+        int* id = it->getId();
+        std::vector<Particule3D> particules_voisines = it->getParticules();
+        // parcourir les cellules de la classe Univers
+        for (auto it_l = cellules.begin(); it_l != cellules.end(); it_l++) {
+            int* id2 = it_l->getId();
+            if (id[0] == id2[0] + 1 || id[0] == id2[0] -1 || id[1] == id2[1] + 1 || id[1] == id2[1] - 1) {
+                // inserer les particules de it_l dans la liste des particules voisines
+                std::vector<Particule3D> particules2 = it_l->getParticules();
+                for (auto it_m = particules2.begin(); it_m != particules2.end(); it_m++) {
+                    particules_voisines.push_back(*it_m);
+                }
+            }
+        }
 
-            for (auto it_k = particules.begin(); it_k != particules.end(); it_k++) {
-                std::vector<Particule3D> particules_voisines;
-                Particule3D particule_k = *it_k;
-                Vector3D pos = particule_k.getPos();
-                // parcourir les cellules de la classe Univers
-                for (auto it_l = cellules.begin(); it_l != cellules.end(); it_l++) {
-                    Vector3D centre = it_l->getCentre();
-                    Vector3D diff = pos - centre;
-                    double norme_diff = diff.norm();
-                    if (norme_diff < rCut) {
-                        // inserer les particules de it_l dans la liste des particules voisines
-                        std::vector<Particule3D> particules2 = it_l->getParticules();
-                        for (auto it_m = particules2.begin(); it_m != particules2.end(); it_m++) {
-                            particules_voisines.push_back(*it_m);
-                        }
+        std::vector<Particule3D> particules = it->getParticules();
+        for (auto it_k = particules.begin(); it_k != particules.end(); it_k++) {
+            
+            Vector3D force_ij;
+            for (auto it_n = particules_voisines.begin(); it_n != particules_voisines.end(); it_n++) {
+                const double masse_i = it_n->getMasse();
+                const Vector3D pos_i = it_n->getPos();
+
+                for (auto it_j = std::next(it_n); it_j != particules_voisines.end(); it_j++) {
+                    const double masse_j = it_j->getMasse();
+                    const Vector3D pos_j = it_j->getPos();
+                    const Vector3D r = pos_i - pos_j;
+                    const double norme_r = r.norm(); 
+
+                    if (norme_r != 0.0) { // Avoid division by zero
+                        force_ij += r * (masse_i * masse_j / (norme_r * norme_r * norme_r));
                     }
                 }
-                // parcourir les cellules voisines
-                Vector3D force_ij;
-                for (auto it_n = particules_voisines.begin(); it_n != particules_voisines.end(); it_n++) {
-                    const double masse_i = it_n->getMasse();
-                    const Vector3D pos_i = it_n->getPos();
-
-                    for (auto it_j = std::next(it_n); it_j != particules_voisines.end(); it_j++) {
-                        const double masse_j = it_j->getMasse();
-                        const Vector3D pos_j = it_j->getPos();
-                        const Vector3D r = pos_i - pos_j;
-                        const double norme_r = r.norm(); 
-
-                        if (norme_r != 0.0) { // Avoid division by zero
-                            force_ij += r * (masse_i * masse_j / (norme_r * norme_r * norme_r));
-                        }
-                    }
-                }    
-
+            }
             forces[it_k->getId()] = force_ij;
-            // print I am here
-            // std::cout << "I am here"<< std::endl;
-            // print force_ij
-            // std::cout << "force_ij = " << force_ij.getX() << " " << force_ij.getY() << " " << force_ij.getZ() << std::endl;                
         }
     }
 

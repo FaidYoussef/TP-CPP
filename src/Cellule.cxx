@@ -4,7 +4,9 @@
 #include <iostream>
 #include <fstream>
 
-Cellule::Cellule( Vector3D centre, std::vector<Particule3D> particules) {
+Cellule::Cellule(int id_1, int id_2, Vector3D centre, std::vector<Particule3D> particules) {
+    this->id[0] = id_1;
+    this->id[1] = id_2;
     this->centre = centre;
     this->particules = particules;
     this->nbParticules = particules.size();
@@ -12,7 +14,9 @@ Cellule::Cellule( Vector3D centre, std::vector<Particule3D> particules) {
 
 Cellule::Cellule() : nbParticules(0), particules(std::vector<Particule3D>()) {}
 
-
+int* Cellule::getId() {
+    return id;
+}
 
 int Cellule::getNbParticules() const {
     return nbParticules;

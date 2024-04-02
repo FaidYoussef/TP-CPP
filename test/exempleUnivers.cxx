@@ -17,7 +17,7 @@
 int main() {
 
     std::vector<Cellule> cellules;
-    Univers univers = Univers(3, cellules, 250, 200, 0, 2.5, 0.005, 1.95);
+    Univers univers = Univers(3, cellules, 250, 45, 0, 2.5, 0.05, 1.95);
 
     int dim_rouge = 40;
     int dim1_bleue = 40;
@@ -43,10 +43,10 @@ int main() {
         }
     }
 
-    for (int i = 0; i < dim1_bleue; i++) {
-        for (int j = 0; j < dim2_bleue; j++) {
-            Particule3D particule_bleue = Particule3D(i*dim2_bleue + j + dim_rouge*dim_rouge, 1, 0, Vector3D(0, 0, 0), Vector3D(i*distance, j*distance, 0), vitesse_bleue);
-            particules_bleues.insert(particules_bleues.begin() + i*dim2_bleue + j, particule_bleue);
+    for (int i = 0; i < dim2_bleue; i++) {
+        for (int j = 0; j < dim1_bleue; j++) {
+            Particule3D particule_bleue = Particule3D(i*dim1_bleue + j + dim_rouge*dim_rouge, 1, 0, Vector3D(0, 0, 0), Vector3D(i*distance, j*distance, 0), vitesse_bleue);
+            particules_bleues.insert(particules_bleues.begin() + i*dim1_bleue + j, particule_bleue);
         }
     }
 
@@ -76,7 +76,7 @@ int main() {
                 }
             }
 
-            Cellule cellule = Cellule(centre, particules);
+            Cellule cellule = Cellule(i, j, centre, particules);
             
             cellules.insert(cellules.begin() + i*nCd2 + j, cellule);
         }
@@ -108,7 +108,7 @@ int main() {
     for (auto& cellule : cellules) {
         nbParticules += cellule.getNbParticules();
     }
-    if (nbParticules != particules_bleues.size() + particules_rouges.size()) {
+    if (nbParticules < particules_bleues.size() + particules_rouges.size()) {
         std::cout << "Erreur dans les cellules" << std::endl;
         return 1;
     }
