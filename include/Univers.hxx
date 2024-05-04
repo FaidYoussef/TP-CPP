@@ -11,6 +11,7 @@ class Univers {
         int dimension;
         int nbParticules;
         // une liste de particules
+        //Tableau à une dimension , performante en termes de mémoire et d'accès
         std::vector<Cellule> cellules;
         int L1;
         int L2;

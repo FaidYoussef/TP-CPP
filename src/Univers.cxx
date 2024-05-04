@@ -247,7 +247,8 @@ void Univers::evolution() {
                 pos += (vit + force * dt * (0.5 / masse)) * dt;
                 it->setPos(pos);
             }
-            ite->setParticules(particules);
+            // à revoir si c'est utile
+            //ite->setParticules(particules);
         }
 
         // Mise à jour des cellules
@@ -261,13 +262,20 @@ void Univers::evolution() {
                     cellule.removeParticule(*it);
                     // Ajouter la particule à la cellule correspondante
                     // Calculer le centre le plus proche
-                    Vector3D centreProche = Vector3D(std::round(pos.getX() / rCut) * rCut, std::round(pos.getY() / rCut) * rCut, std::round(pos.getZ() / rCut) * rCut);
-                    for (auto& cellule2 : cellules) {
-                        if (cellule2.getCentre() == centreProche) {
-                            cellule2.addParticule(*it);
-                            break;
-                        }
+                    //Vector3D centreProche = Vector3D(std::floor(pos.getX() / rCut) * rCut + 0.5*rCut, std::floor(pos.getY() / rCut) * rCut + 0.5*rCut, std::round(pos.getZ() / rCut) * rCut + 0.5*rCut);
+                    //for (auto& cellule2 : cellules) {
+                      //  if (cellule2.getCentre() == centreProche) {
+                     //       cellule2.addParticule(*it);
+                    //        break;
+                    //    }
+                    //}
+                    if (pos.getX()>=0 && pos.getX()<=L1 && pos.getY()>=0 && pos.getX()<=L2) {
+                       int index1 = std::ceil(pos.getX() / rCut);
+                       int index2 = std::ceil(pos.getY() / rCut);
+                       cellules[index1 + index2 * (L1 / rCut)].addParticule(*it);
                     }
+
+
                 }
             }
         }
@@ -278,15 +286,16 @@ void Univers::evolution() {
         // Calcul des forces
         // forces.clear(); // Clear la liste des forces
             // parcourir les particules de chaque cellule de la classe Univers
-    for (auto it = cellules.begin(); it != cellules.end(); it++) {
-        std::vector<Particule3D> particules = it->getParticules();
-        for (auto it = particules.begin(); it != particules.end(); it++) {
-            // stocker chaque force à la id-ième position de la liste des forcesOld
-            forcesOld[it->getId()] = it->getForce();
-        }
-    }
-    std::vector<Vector3D> forces;
-    forces.reserve(nbParticules);
+    //for (auto it = cellules.begin(); it != cellules.end(); it++) {
+     //   std::vector<Particule3D> particules = it->getParticules();
+      //  for (auto it = particules.begin(); it != particules.end(); it++) {
+      //      // stocker chaque force à la id-ième position de la liste des forcesOld
+       //     forcesOld[it->getId()] = it->getForce();
+       // }
+    //}
+
+    //std::vector<Vector3D> forces;
+    //forces.reserve(nbParticules);
     // Calcul des forces
     for (auto it = cellules.begin(); it != cellules.end(); it++) {
         int* id = it->getId();
