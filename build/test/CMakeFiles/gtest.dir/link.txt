@@ -1,1 +1,0 @@
-/usr/bin/c++ -Wall -g -O3 -DNDEBUG CMakeFiles/gtest.dir/gtest.cxx.o -o gtest 

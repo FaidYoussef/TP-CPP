@@ -1,2 +1,0 @@
-/usr/bin/ar qc libUnivers.a CMakeFiles/Univers.dir/Univers.cxx.o CMakeFiles/Univers.dir/Cellule.cxx.o CMakeFiles/Univers.dir/Particule3D.cxx.o CMakeFiles/Univers.dir/Vector3D.cxx.o
-/usr/bin/ranlib libUnivers.a

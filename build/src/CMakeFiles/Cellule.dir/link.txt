@@ -1,2 +1,0 @@
-/usr/bin/ar qc libCellule.a CMakeFiles/Cellule.dir/Cellule.cxx.o
-/usr/bin/ranlib libCellule.a
