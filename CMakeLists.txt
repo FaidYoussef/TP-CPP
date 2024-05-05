@@ -31,9 +31,11 @@ add_subdirectory(src)
 
 include(FetchContent)
 FetchContent_Declare(
-    googletest
-    URL https://github.com/google/googletest/archive/git-commit-hash.zip
+        googletest
+        GIT_REPOSITORY https://github.com/google/googletest.git
+        GIT_TAG        release-1.8.0
 )
+FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 add_subdirectory(test)
