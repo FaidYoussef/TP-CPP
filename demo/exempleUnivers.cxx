@@ -15,7 +15,6 @@
 
 
 int main() {
-    std::cout << "Evolution en cours" << std::endl;
 
     Univers univers = Univers(3, 250, 45, 0, 2.5, 0.05, 1.95);
 

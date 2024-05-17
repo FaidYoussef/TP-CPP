@@ -13,6 +13,35 @@ Particule3D::Particule3D(int id, float masse, int catégorie, Vector3D force, Ve
 
 Particule3D::Particule3D() : id(0), masse(0), catégorie(0), force(Vector3D()), position(Vector3D()), vitesse(Vector3D()) {}
 
+// Destructor
+Particule3D::~Particule3D() {
+    // No dynamic memory to free, nothing to do here
+}
+
+// Copy constructor
+Particule3D::Particule3D(const Particule3D &other) {
+    id = other.id;
+    masse = other.masse;
+    catégorie = other.catégorie;
+    force = other.force;
+    position = other.position;
+    vitesse = other.vitesse;
+}
+
+// Copy assignment operator
+Particule3D& Particule3D::operator=(const Particule3D &other) {
+    if (this == &other) {
+        return *this; // Handle self-assignment
+    }
+    id = other.id;
+    masse = other.masse;
+    catégorie = other.catégorie;
+    force = other.force;
+    position = other.position;
+    vitesse = other.vitesse;
+    return *this;
+}
+
 bool Particule3D::operator<(const Particule3D& other) const {
     return id < other.id;
 }

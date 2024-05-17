@@ -6,6 +6,25 @@ Vector3D::Vector3D(double x, double y, double z) : x(x), y(y), z(z) {}
 
 Vector3D::Vector3D() : x(0), y(0), z(0) {}
 
+// Destructor
+Vector3D::~Vector3D() {
+    // No dynamic memory to free, nothing to do here
+}
+
+// Copy constructor
+Vector3D::Vector3D(const Vector3D &other) : x(other.x), y(other.y), z(other.z) {}
+
+// Copy assignment operator
+Vector3D& Vector3D::operator=(const Vector3D &other) {
+    if (this == &other) {
+        return *this; // Handle self-assignment
+    }
+    x = other.x;
+    y = other.y;
+    z = other.z;
+    return *this;
+}
+
 void Vector3D::setX(double x) {
     this->x = x;
 }

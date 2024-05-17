@@ -170,25 +170,6 @@ void Univers::setCellules(std::vector<Cellule> cellules) {
 
 void Univers::evolution() {
 
-    // Nombre maximal de fichiers à créer (data_t0.vtu jusqu'à data_tmax.vtu)
-    int maxFiles = (tmax-t0) / dt; 
-
-
-    // Créer les fichiers data_t0.vtu jusqu'à data_tmax.vtu
-    for (int t = 0; t <= maxFiles; ++t) {
-        // Nom du fichier à créer pour l'instant t
-        std::string newFilename = "data_t" + std::to_string(t) + ".vtu";
-
-        // Ouvrir le nouveau fichier en écriture
-        std::ofstream newFile(newFilename);
-        if (!newFile.is_open()) {
-            std::cerr << "Erreur : Impossible de créer le fichier " << newFilename << " en écriture." << std::endl;
-            exit(1);
-        }
-
-        // Fermer le nouveau fichier
-        newFile.close();
-    }
 
     std::string filename = "data_t0.vtu";
     std::ofstream file(filename);
@@ -329,6 +310,7 @@ void Univers::evolution() {
     float t = 0.;
     int file_index = 0;
     while (t < tmax) {
+        std::cout << "t = " << t << std::endl;  
         file_index++;
         t += dt;
         for (auto cellule = cellules.begin(); cellule != cellules.end(); cellule++) {
@@ -407,6 +389,7 @@ void Univers::evolution() {
                     }
                 }
             }
+            std::cout << "I am here" << std::endl;
 
             std::vector<Particule3D> particules = cellule->getParticules();
             for (auto p1 = particules.begin(); p1 != particules.end(); p1++) {
@@ -442,6 +425,7 @@ void Univers::evolution() {
             }
             // cellule->setParticules(particules);
         }
+
 
         // remplir le fichier data_t.vtu avec les nouvelles positions, vitesses et masses des particules
         std::string filename = "data_t" + std::to_string(file_index) + ".vtu";

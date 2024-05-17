@@ -17,6 +17,10 @@ class Particule3D {
         // Constructeurs
         Particule3D(int id, float masse, int catégorie, Vector3D force, Vector3D position, Vector3D vitesse);
         Particule3D();
+        ~Particule3D();  // Destructor
+        Particule3D(const Particule3D &other);  // Copy constructor
+        Particule3D& operator=(const Particule3D &other);  // Copy assignment operator
+
 
         // Méthodes de modification des attributs
         void setPos(Vector3D pos);

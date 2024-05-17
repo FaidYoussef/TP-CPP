@@ -13,6 +13,13 @@ public:
     // Constructeurs
     Vector3D(double x, double y, double z);
     Vector3D();
+    // Destructor
+    ~Vector3D();
+
+    // Copy constructor
+    Vector3D(const Vector3D &other) ;
+
+    // Copy assignment operator
 
     // Accesseurs
     double getX() const;
@@ -25,6 +32,7 @@ public:
     void setZ(double z);
 
     // Opérateurs surchargés
+    Vector3D& operator=(const Vector3D &other) ;
     Vector3D operator-(const Vector3D& other) const;
     Vector3D operator+(const Vector3D& other) const;
     Vector3D operator+=(const Vector3D& other);
