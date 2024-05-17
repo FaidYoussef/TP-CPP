@@ -1,6 +1,3 @@
-# executable de exemple_univers
-#add_executable(exempleUnivers exempleUnivers.cxx)
-# add_executable(gtest gtest.cxx)
 
 # Include the src directory for header files
 include_directories(${CMAKE_SOURCE_DIR}/src)
