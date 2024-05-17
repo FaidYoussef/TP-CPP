@@ -71,7 +71,7 @@ void Univers::initialiser() {
 
     int nCd1 = L1 / rCut;
     int nCd2 = L2 / rCut;
-    
+
     // print nCd1, nCd2
     std::cout << "nCd1 : " << nCd1 << std::endl;
     std::cout << "nCd2 : " << nCd2 << std::endl;
@@ -97,7 +97,7 @@ void Univers::initialiser() {
             }
 
             Cellule cellule = Cellule(i, j, centre, particules);
-            
+
             cellules[i*nCd2 + j] = cellule;
         }
     }
@@ -131,6 +131,83 @@ void Univers::initialiser() {
         std::cout << "Erreur dans les cellules" << std::endl;
         exit(1);
     }
+}
+
+void Univers ::initialiser2() {
+    int nCellsX = L1 / rCut;
+    int nCellsY = L2 / rCut;
+    cellules.reserve(nCellsX*nCellsY);
+
+    // Créer toutes les cellules
+    for ( int i = 0; i < nCellsX; i++) {
+        for ( int j = 0 ; j < nCellsY;j++) {
+            Vector3D centre((i + 1./2.) * rCut, (j + 1./2.)*rCut, 0);
+            Cellule cellule(i,j,centre);
+            cellules.push_back(cellule);
+        }
+    }
+
+    //Génération des particules rouges et bleues
+    int dim_rouge = 4;
+    int dim1_bleue = 4;
+    int dim2_bleue = 16;
+
+    std::vector<Particule3D> particules_bleues;
+    particules_bleues.reserve(dim1_bleue*dim2_bleue);
+    std::vector<Particule3D> particules_rouges;
+    particules_rouges.reserve(dim_rouge*dim_rouge);
+
+    Vector3D vitesse_bleue(0, 0, 0);
+    Vector3D vitesse_rouge(0, 10, 0);
+
+    float distance = std::pow(2, 1.0/6.0);
+
+    for (int i = 0; i < dim_rouge; i++) {
+        for (int j = 0; j < dim_rouge; j++) {
+            Particule3D particule_rouge = Particule3D(i*dim_rouge + j, 1, 1, Vector3D(0, 0, 0), Vector3D(i*distance, j*distance, 0), vitesse_rouge);
+            // print i*distance
+            // std::cout << particule_rouge.getPos().getX() << std::endl;
+            particules_rouges.insert(particules_rouges.begin() + i*dim_rouge + j, particule_rouge);
+        }
+    }
+
+    for (int i = 0; i < dim1_bleue; i++) {
+        for (int j = 0; j < dim2_bleue; j++) {
+            Particule3D particule_bleue = Particule3D(i*dim2_bleue + j + dim_rouge*dim_rouge, 1, 0, Vector3D(0, 0, 0), Vector3D(i*distance, j*distance, 0), vitesse_bleue);
+            particules_bleues.insert(particules_bleues.begin() + i*dim2_bleue + j, particule_bleue);
+        }
+    }
+
+    //Assignation des paricules aux cellules
+
+    for (const auto& particule : particules_rouges) {
+        assignParticule(particule,nCellsX);
+    }
+
+    for (const auto& particule : particules_bleues) {
+        assignParticule(particule,nCellsX);
+    }
+
+
+    // print nCd1, nCd2
+    std::cout << "nCd1 : " << nCellsX << std::endl;
+    std::cout << "nCd2 : " << nCellsY << std::endl;
+    // print nCellsX*nCells
+    std::cout << "nCellsX*nCd2 : " << nCellsX*nCellsY << std::endl;
+
+
+}
+
+void Univers :: assignParticule(const Particule3D& particule,int nCellsX) {
+    int cellX =(int) (particule.getPos().getX() / rCut);
+    int cellY = (int) (particule.getPos().getY() / rCut);
+    int index = cellX + cellY * nCellsX;
+    if (index < cellules.size()) {
+        cellules[index].addParticule(particule);
+    } else {
+        std::cerr << "Computed cell index is out of bounds: " << index << std::endl;
+    }
+
 }
 
 int Univers::getDimension() const {

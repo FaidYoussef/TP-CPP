@@ -42,8 +42,11 @@ class Univers {
     void writeVTKFile(std::string filename);
 
     std::vector<Vector3D> calculForces(std::vector<Vector3D> forcesOld);
+    void initialiser2();
 
     void evolution();
+
+    void assignParticule(const Particule3D&,int nCellX);
 };
 
 #endif // UNIVERS_HXX
