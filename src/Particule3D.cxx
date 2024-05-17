@@ -56,10 +56,8 @@ void Particule3D::setVit(float x, float y, float z) {
     vitesse.setZ(z);
 }
 
-void Particule3D::setForce(float x, float y, float z) {
-    force.setX(x);
-    force.setY(y);
-    force.setZ(z);
+void Particule3D::setForce(Vector3D f) {
+    force = f;
 }
 
 void Particule3D::setMasse(float m) {

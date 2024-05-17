@@ -25,7 +25,7 @@ class Particule3D {
         // Méthodes de modification des attributs
         void setPos(Vector3D pos);
         void setVit(float x, float y, float z);
-        void setForce(float x, float y, float z);
+        void setForce(Vector3D f);
         void setMasse(float m);
         void setCategorie(int c);
         void setId(int i);
