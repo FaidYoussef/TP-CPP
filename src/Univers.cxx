@@ -78,6 +78,7 @@ void Univers::initialiser() {
     // print nCd1*nCd2
     std::cout << "nCd1*nCd2 : " << nCd1*nCd2 << std::endl;
 
+    cellules.reserve(nCd1*nCd2);
     for (int i = 0; i < nCd1; i++) {
         for (int j = 0; j < nCd2; j++) {
             Vector3D centre = Vector3D((i + 1./2.) * rCut, (j + 1./2.)*rCut, 0);
@@ -168,10 +169,7 @@ void Univers::setCellules(std::vector<Cellule> cellules) {
     }
 }
 
-void Univers::evolution() {
-
-
-    std::string filename = "data_t0.vtu";
+void Univers::writeVTKFile(std::string filename) {
     std::ofstream file(filename);
     if (!file.is_open()) {
         std::cerr << "Erreur : Impossible d'ouvrir le fichier " << filename << " en écriture." << std::endl;
@@ -246,121 +244,9 @@ void Univers::evolution() {
     file << "</VTKFile>" << std::endl;
 
     file.close();
+}
 
-
-
-    std::cout << nbParticules << std::endl;
-
-    // Implémentation de l'algorithme de Verlet
-    
-
-    // Stocker les forces des particules de la classe Univers dans une liste de vecteurs de forces
-    std::vector<Vector3D> forcesOld;
-    forcesOld.reserve(nbParticules);
-
-
-    // parcourir les particules de chaque cellule de la classe Univers
-    for (auto cellule = cellules.begin(); cellule != cellules.end(); cellule++) {
-        std::vector<Particule3D> particules = cellule->getParticules();
-        for (auto p = particules.begin(); p != particules.end(); p++) {
-            // stocker chaque force à la id-ième position de la liste des forcesOld
-            // forcesOld.insert(forcesOld.begin() + p->getId(), p->getForce());
-            forcesOld[p->getId()] = p->getForce();
-        }
-    }
-
-    // Calcul des forces
-    for (auto cellule = cellules.begin(); cellule != cellules.end(); cellule++) {
-        int* id = cellule->getId();
-        std::vector<Particule3D> particules_voisines = cellule->getParticules();
-        // parcourir les cellules de la classe Univers ( A REVOIR!!!!!!!!!)
-        for (auto autre_cellule = cellules.begin(); autre_cellule != cellules.end(); autre_cellule++) {
-            int* id2 = autre_cellule->getId();
-            if (id[0] == id2[0] + 1 || id[0] == id2[0] -1 || id[1] == id2[1] + 1 || id[1] == id2[1] - 1) {
-                // inserer les particules de it_l dans la liste des particules voisines
-                std::vector<Particule3D> particules2 = autre_cellule->getParticules();
-                for (auto it_m = particules2.begin(); it_m != particules2.end(); it_m++) {
-                    particules_voisines.push_back(*it_m);
-                }
-            }
-        }
-
-        std::vector<Particule3D> particules = cellule->getParticules();
-        for (auto p1 = particules.begin(); p1 != particules.end(); p1++) {
-            
-            Vector3D force_1 = p1->getForce();
-            const double masse_i = p1->getMasse();
-            const Vector3D pos_i = p1->getPos();
-
-            for (auto p2 = particules_voisines.begin(); p2 != particules_voisines.end(); p2++) {
-                const double masse_j = p2->getMasse();
-                const Vector3D pos_j = p2->getPos();
-                Vector3D force_2 = p2->getForce();
-                const Vector3D r = pos_i - pos_j;
-                const double norme_r = r.norm(); 
-
-                if (norme_r != 0.0) { // Avoid division by zero
-                    force_1 += r * (masse_i * masse_j / (norme_r * norme_r * norme_r));
-                    force_2 += r * (masse_i * masse_j / (norme_r * norme_r * norme_r)) * (-1);
-                }
-                p2->setForce(force_2);
-            }
-            p1->setForce(force_1);
-        }
-    }
-    
-    // Initialisation du temps
-    float t = 0.;
-    int file_index = 0;
-    while (t < tmax) {
-        std::cout << "t = " << t << std::endl;  
-        file_index++;
-        t += dt;
-        for (auto cellule = cellules.begin(); cellule != cellules.end(); cellule++) {
-            std::vector<Particule3D> particules = cellule->getParticules();
-            for (auto p = particules.begin(); p != particules.end(); p++) {
-                Vector3D pos = p->getPos();
-                // print the id and the position of the particle 0
-                Vector3D vit = p->getVit();
-                float masse = p->getMasse();
-                Vector3D force = p->getForce();
-                pos += (vit + force * dt * (0.5 / masse)) * dt;
-                p->setPos(pos);
-            }
-            // à revoir si c'est utile
-            //ite->setParticules(particules);
-        }
-
-        // Mise à jour des cellules
-        for (auto cellule = cellules.begin(); cellule != cellules.end(); cellule++) {
-            std::vector<Particule3D> particules = cellule->getParticules();
-            for (auto p = particules.begin(); p != particules.end(); p++) {
-                Vector3D pos = p->getPos();
-                Vector3D centre = cellule->getCentre();
-
-                if (std::abs(pos.getX() - centre.getX()) > rCut / 2. || std::abs(pos.getY() - centre.getY()) > rCut / 2. || std::abs(pos.getZ() - centre.getZ()) > rCut / 2.) {
-                    // Supprimer la particule de la cellule
-                    cellule->removeParticule(*p);
-                    // Ajouter la particule à la cellule correspondante
-                    // Calculer le centre le plus proche
-                    //Vector3D centreProche = Vector3D(std::floor(pos.getX() / rCut) * rCut + 0.5*rCut, std::floor(pos.getY() / rCut) * rCut + 0.5*rCut, std::round(pos.getZ() / rCut) * rCut + 0.5*rCut);
-                    //for (auto& cellule2 : cellules) {
-                      //  if (cellule2.getCentre() == centreProche) {
-                     //       cellule2.addParticule(*it);
-                    //        break;
-                    //    }
-                    //}
-                    if (pos.getX()>=0 && pos.getX()<=L1 && pos.getY()>=0 && pos.getX()<=L2) {
-                       int index1 = std::ceil(pos.getX() / rCut);
-                       int index2 = std::ceil(pos.getY() / rCut);
-                       cellules[index1 + index2 * (L1 / rCut)].addParticule(*p);
-                    }
-
-
-                }
-            }
-        }
-
+std::vector<Vector3D> Univers::calculForces(std::vector<Vector3D> forcesOld) {
 
     for (auto it = cellules.begin(); it != cellules.end(); it++) {
           std::vector<Particule3D> particules = it->getParticules();
@@ -409,100 +295,99 @@ void Univers::evolution() {
             p1->setForce(force_1);
         }
     }
-            
 
+    return forcesOld;
+}
+
+void Univers::evolution() {
+
+
+    std::string filename = "data_t0.vtu";
+    writeVTKFile(filename);
+
+    // Implémentation de l'algorithme de Verlet    
+    // Stocker les forces des particules de la classe Univers dans une liste de vecteurs de forces
+    std::vector<Vector3D> forcesOld;
+    forcesOld.reserve(nbParticules);
+
+    forcesOld = calculForces(forcesOld);
+    
+    // Initialisation du temps
+    float t = 0.;
+    int file_index = 0;
+    while (t < tmax) {
+        std::cout << "t = " << t << std::endl;  
+        file_index++;
+        t += dt;
+
+        // Mise à jour des positions
         for (auto cellule = cellules.begin(); cellule != cellules.end(); cellule++) {
             std::vector<Particule3D> particules = cellule->getParticules();
             for (auto p = particules.begin(); p != particules.end(); p++) {
+                Vector3D pos = p->getPos();
+                // print the id and the position of the particle 0
                 Vector3D vit = p->getVit();
                 float masse = p->getMasse();
                 Vector3D force = p->getForce();
-                Vector3D forceOld = *(std::next(forcesOld.begin(), p->getId()));
-                vit = vit + (force + forceOld) * dt * (0.5 / masse);
-                p->setVit(vit.getX(), vit.getY(), vit.getZ());
+                pos += (vit + force * dt * (0.5 / masse)) * dt;
+                p->setPos(pos);
             }
-            // cellule->setParticules(particules);
+            // à revoir si c'est utile
+            //ite->setParticules(particules);
         }
 
+        // Mise à jour des cellules
+        for (auto cellule = cellules.begin(); cellule != cellules.end(); cellule++) {
+            std::vector<Particule3D> particules = cellule->getParticules();
+            for (auto p = particules.begin(); p != particules.end(); p++) {
+                Vector3D pos = p->getPos();
+                Vector3D centre = cellule->getCentre();
 
-        // remplir le fichier data_t.vtu avec les nouvelles positions, vitesses et masses des particules
-        std::string filename = "data_t" + std::to_string(file_index) + ".vtu";
-        std::ofstream file(filename);
-        if (!file.is_open()) {
-            std::cerr << "Erreur : Impossible d'ouvrir le fichier " << filename << " en écriture." << std::endl;
-            exit(1);
-        }
-        // Initialiser le fichier data_t.vtu avec les positions, vitesses et masses des particules
-        file << "<?xml version=\"1.0\"?>" << std::endl;
-        file << "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"BigEndian\">" << std::endl;
-        file << "  <UnstructuredGrid>" << std::endl;
-        file << "    <Piece NumberOfPoints=\"" << nbParticules << "\" NumberOfCells=\"0\">" << std::endl;
-        file << "      <Points>" << std::endl;
-        file << "        <DataArray name=\"Position\" type=\"Float32\" NumberOfComponents=\"" << dimension << "\" format=\"ascii\">" << std::endl;
-        // Ajouter les positions des particules
-        for (auto ite = cellules.begin(); ite != cellules.end(); ite++) {
-            std::vector<Particule3D> particules = ite->getParticules();
-            for (auto it = particules.begin(); it != particules.end(); it++) {
-                Vector3D pos = it->getPos();
-                if (dimension == 1) {
-                    file << pos.getX() << " ";
-                } else if (dimension == 2) {
-                    file << pos.getX() << " " << pos.getY() << " ";
-                } else {
-                    file << pos.getX() << " " << pos.getY() << " " << pos.getZ() << " ";
+                if (std::abs(pos.getX() - centre.getX()) > rCut / 2. || std::abs(pos.getY() - centre.getY()) > rCut / 2. || std::abs(pos.getZ() - centre.getZ()) > rCut / 2.) {
+                    // Supprimer la particule de la cellule
+                    cellule->removeParticule(*p);
+                    // Ajouter la particule à la cellule correspondante
+                    // Calculer le centre le plus proche
+                    //Vector3D centreProche = Vector3D(std::floor(pos.getX() / rCut) * rCut + 0.5*rCut, std::floor(pos.getY() / rCut) * rCut + 0.5*rCut, std::round(pos.getZ() / rCut) * rCut + 0.5*rCut);
+                    //for (auto& cellule2 : cellules) {
+                      //  if (cellule2.getCentre() == centreProche) {
+                     //       cellule2.addParticule(*it);
+                    //        break;
+                    //    }
+                    //}
+                    if (pos.getX()>=0 && pos.getX()<=L1 && pos.getY()>=0 && pos.getX()<=L2) {
+                       int index1 = std::ceil(pos.getX() / rCut);
+                       int index2 = std::ceil(pos.getY() / rCut);
+                       cellules[index1 + index2 * (L1 / rCut)].addParticule(*p);
+                    }
                 }
             }
         }
-        file << std::endl;
-        file << "        </DataArray>" << std::endl;
-        file << "      </Points>" << std::endl;
-        file << "      <PointData Vectors=\"vector\">" << std::endl;
-        file << "        <DataArray type=\"Float32\" Name=\"Velocity\" NumberOfComponents=\"" << dimension << "\" format=\"ascii\">" << std::endl;
-        // Ajouter les vitesses des particules
-        for (auto ite = cellules.begin(); ite != cellules.end(); ite++) {
-            std::vector<Particule3D> particules = ite->getParticules();
-            for (auto it = particules.begin(); it != particules.end(); it++) {
-                Vector3D vit = it->getVit();
-                if (dimension == 1) {
-                    file << vit.getX() << " ";
-                } else if (dimension == 2) {
-                    file << vit.getX() << " " << vit.getY() << " ";
-                } else {
-                    file << vit.getX() << " " << vit.getY() << " " << vit.getZ() << " ";
-                }
-            }
-        }
-        file << std::endl;
-        file << "        </DataArray>" << std::endl;
-        file << "        <DataArray type=\"Float32\" Name=\"Masse\" format=\"ascii\">" << std::endl;
-        // Ajouter les masses des particules
-        for (auto ite = cellules.begin(); ite != cellules.end(); ite++) {
-            std::vector<Particule3D> particules = ite->getParticules();
-            for (auto it = particules.begin(); it != particules.end(); it++) {
-                float masse = it->getMasse();
-                file << masse << " ";
-            }
-        }
-        file << std::endl;
-        file << "        </DataArray>" << std::endl;
-        file << "      </PointData>" << std::endl;
-        file << "      <Cells>" << std::endl;
-        file << "        <DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">" << std::endl;
-        file << "        </DataArray>" << std::endl;
-        file << "        <DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\">" << std::endl;
-        file << "        </DataArray>" << std::endl;
-        file << "        <DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\">" << std::endl;
-        file << "        </DataArray>" << std::endl;
-        file << "      </Cells>" << std::endl;
-        file << "    </Piece>" << std::endl;
-        file << "  </UnstructuredGrid>" << std::endl;
-        file << "</VTKFile>" << std::endl;
 
-        file.close();
 
-        // print le pourcentage de l'évolution
-        std::cout << "Pourcentage de l'évolution : " << t / tmax * 100 << "%" << std::endl;
+    forcesOld = calculForces(forcesOld);
+            
+
+    for (auto cellule = cellules.begin(); cellule != cellules.end(); cellule++) {
+        std::vector<Particule3D> particules = cellule->getParticules();
+        for (auto p = particules.begin(); p != particules.end(); p++) {
+            Vector3D vit = p->getVit();
+            float masse = p->getMasse();
+            Vector3D force = p->getForce();
+            Vector3D forceOld = *(std::next(forcesOld.begin(), p->getId()));
+            vit = vit + (force + forceOld) * dt * (0.5 / masse);
+            p->setVit(vit.getX(), vit.getY(), vit.getZ());
         }
+        // cellule->setParticules(particules);
+    }
 
-        std::cout << "Evolution terminée" << std::endl;
+
+    // remplir le fichier data_t.vtu avec les nouvelles positions, vitesses et masses des particules
+    std::string filename = "data_t" + std::to_string(file_index) + ".vtu";
+    writeVTKFile(filename);
+    // print le pourcentage de l'évolution
+    std::cout << "Pourcentage de l'évolution : " << (t -dt) / tmax * 100 << "%" << std::endl;
+    }
+
+    std::cout << "Evolution terminée" << std::endl;
     }

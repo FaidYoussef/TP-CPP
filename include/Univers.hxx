@@ -1,6 +1,7 @@
 
 #include <list>
 #include "Cellule.hxx"
+#include <string>
 
 #ifndef UNIVERS_HXX
 #define UNIVERS_HXX
@@ -37,6 +38,10 @@ class Univers {
     void setCellules(std::vector<Cellule> cellules);
 
     void initialiser();
+
+    void writeVTKFile(std::string filename);
+
+    std::vector<Vector3D> calculForces(std::vector<Vector3D> forcesOld);
 
     void evolution();
 };
