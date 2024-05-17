@@ -14,6 +14,33 @@ Cellule::Cellule(int id_1, int id_2, Vector3D centre, std::vector<Particule3D> p
 
 Cellule::Cellule() : nbParticules(0), particules(std::vector<Particule3D>()) {}
 
+// Destructor
+Cellule::~Cellule() {
+    // No dynamic memory to free, nothing to do here
+}
+
+// Copy constructor
+Cellule::Cellule(const Cellule &other) {
+    id[0] = other.id[0];
+    id[1] = other.id[1];
+    centre = other.centre;
+    particules = other.particules;
+    nbParticules = other.nbParticules;
+}
+
+// Copy assignment operator
+Cellule& Cellule::operator=(const Cellule &other) {
+    if (this == &other) {
+        return *this; // Handle self-assignment
+    }
+    id[0] = other.id[0];
+    id[1] = other.id[1];
+    centre = other.centre;
+    particules = other.particules;
+    nbParticules = other.nbParticules;
+    return *this;
+}
+
 int* Cellule::getId() {
     return id;
 }

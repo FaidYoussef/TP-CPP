@@ -17,6 +17,14 @@ class Cellule {
     public:
         Cellule(int id_1, int id_2, Vector3D centre, std::vector<Particule3D> particules);
         Cellule();
+        // Destructor
+        ~Cellule();
+
+        // Copy constructor
+        Cellule(const Cellule &other);
+
+        // Copy assignment operator
+        Cellule& operator=(const Cellule &other);
     
     int getNbParticules() const;
     int* getId();
