@@ -9,7 +9,14 @@ Cellule::Cellule(int id_1, int id_2, Vector3D centre, std::vector<Particule3D> p
     this->id[1] = id_2;
     this->centre = centre;
     this->particules = particules;
-    this->nbParticules = particules.size();
+    this->nbParticules = (int) particules.size() ;
+}
+Cellule ::Cellule(int id_1, int id_2, Vector3D centre) {
+    this->id[0] = id_1;
+    this->id[1] = id_2;
+    this->centre = centre;
+    this->particules = std::vector<Particule3D>();
+    this->nbParticules = 0;
 }
 
 Cellule::Cellule() : nbParticules(0), particules(std::vector<Particule3D>()) {}

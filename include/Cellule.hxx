@@ -16,7 +16,9 @@ class Cellule {
 
     public:
         Cellule(int id_1, int id_2, Vector3D centre, std::vector<Particule3D> particules);
-        Cellule();
+    Cellule(int id_1, int id_2, Vector3D centre);
+
+    Cellule();
         // Destructor
         ~Cellule();
 

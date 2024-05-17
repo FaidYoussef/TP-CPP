@@ -38,7 +38,11 @@ class Univers {
 
     void initialiser();
 
+    void initialiser2();
+
     void evolution();
+
+    void assignParticule(const Particule3D&,int nCellX);
 };
 
 #endif // UNIVERS_HXX
