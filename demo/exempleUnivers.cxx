@@ -32,7 +32,7 @@ int main() {
 
 
     std::cout << "Evolution" << std::endl;
-    //univers.evolution();
+    univers.evolution();
 
     std::cout << "FIN" << std::endl;
     return 0;

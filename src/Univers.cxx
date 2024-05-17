@@ -164,7 +164,7 @@ void Univers ::initialiser2() {
 
     for (int i = 0; i < dim_rouge; i++) {
         for (int j = 0; j < dim_rouge; j++) {
-            Particule3D particule_rouge = Particule3D(i*dim_rouge + j, 1, 1, Vector3D(0, 0, 0), Vector3D(i*distance, j*distance, 0), vitesse_rouge);
+            Particule3D particule_rouge = Particule3D(i*dim_rouge + j, 1, 1, Vector3D(0, 0, 0), Vector3D(i*distance + 2* dim1_bleue*distance, j*distance + dim_rouge*distance, 0), vitesse_rouge);
             // print i*distance
             // std::cout << particule_rouge.getPos().getX() << std::endl;
             particules_rouges.insert(particules_rouges.begin() + i*dim_rouge + j, particule_rouge);
@@ -188,6 +188,10 @@ void Univers ::initialiser2() {
         assignParticule(particule,nCellsX);
     }
 
+    // set nbParticules
+    for (auto& cellule : cellules) {
+        nbParticules += cellule.getNbParticules();
+    }
 
     // print nCd1, nCd2
     std::cout << "nCd1 : " << nCellsX << std::endl;
@@ -323,13 +327,21 @@ void Univers::writeVTKFile(std::string filename) {
     file.close();
 }
 
-std::vector<Vector3D> Univers::calculForces(std::vector<Vector3D> forcesOld) {
-
-    for (auto it = cellules.begin(); it != cellules.end(); it++) {
-          std::vector<Particule3D> particules = it->getParticules();
-         for (auto it = particules.begin(); it != particules.end(); it++) {
+void Univers::calculForces(std::vector<Vector3D> & forcesOld) {
+    std::cout << "taille forcesOld : " << forcesOld.size() << std::endl;
+    std::cout << "nbParticules : " << nbParticules << std::endl;
+    forcesOld.reserve(nbParticules);    
+    for (auto cellule = cellules.begin(); cellule != cellules.end(); cellule++) {
+          std::vector<Particule3D> particules = cellule->getParticules();
+         for (auto p = particules.begin(); p != particules.end(); p++) {
              // stocker chaque force à la id-ième position de la liste des forcesOld
-            forcesOld[it->getId()] = it->getForce();
+            // forcesOld[it->getId()] = it->getForce();
+            int id = p->getId();
+            if (id >= 0 && id < forcesOld.size()) {
+                forcesOld[id] = p->getForce();
+            } else {
+                std::cerr << "Invalid particle ID: " << id << std::endl;
+            }
         }
     }
 
@@ -372,8 +384,6 @@ std::vector<Vector3D> Univers::calculForces(std::vector<Vector3D> forcesOld) {
             p1->setForce(force_1);
         }
     }
-
-    return forcesOld;
 }
 
 void Univers::evolution() {
@@ -385,9 +395,10 @@ void Univers::evolution() {
     // Implémentation de l'algorithme de Verlet    
     // Stocker les forces des particules de la classe Univers dans une liste de vecteurs de forces
     std::vector<Vector3D> forcesOld;
-    forcesOld.reserve(nbParticules);
+    forcesOld.resize(nbParticules);
 
-    forcesOld = calculForces(forcesOld);
+    calculForces(forcesOld);
+
     
     // Initialisation du temps
     float t = 0.;
@@ -442,7 +453,7 @@ void Univers::evolution() {
         }
 
 
-    forcesOld = calculForces(forcesOld);
+    calculForces(forcesOld);
             
 
     for (auto cellule = cellules.begin(); cellule != cellules.end(); cellule++) {
