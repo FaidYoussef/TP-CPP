@@ -56,7 +56,7 @@ int Cellule::getNbParticules() const {
     return nbParticules;
 }
 
-std::vector<Particule3D> Cellule::getParticules() {
+std::vector<Particule3D>& Cellule::getParticules() {
     return particules;
 }
 
