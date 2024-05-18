@@ -16,9 +16,9 @@
 
 int main() {
 
-    Univers univers = Univers(3, 300, 200, 0, 1, 1,2.5,0.00005, 1.95);
+    Univers univers = Univers(3, 300, 200, 0, 1, 1,2.5,0.05, 1.95);
 
-    univers.initialiser2();
+    univers.initialiser2(4,4,4,16,Vector3D(0,-10,0),Vector3D(0,5,0));
     std :: vector<Cellule> cell = univers.getCellules();
 
 

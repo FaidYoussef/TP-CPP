@@ -502,9 +502,9 @@ void Univers::periodicBC() {
         int* id = cellule->getId();
         if (id[0] == 0 || id[0] == L1 / rCut - 1 || id[1] == 0 || id[1] == L2 / rCut - 1) {
             // get the particles of the cellule
-            std::vector<Particule3D> particules = cellule->getParticules();
+            std::vector<Particule3D> part = cellule->getParticules();
             // verify if the particule is out of the domain
-            for (auto p = particules.begin(); p != particules.end(); p++) {
+            for (auto p = part.begin(); p != part.end(); p++) {
                 Vector3D pos = p->getPos();
                 if (p->getPos().getX() < 0 || p->getPos().getX() > L1 ) {
                     if (id[0] == 0) {
@@ -524,7 +524,7 @@ void Univers::periodicBC() {
                 }
                 p->setPos(pos);
                 }
-                cellule->setParticules(particules);
+                cellule->setParticules(part);
             }
         }
     }
@@ -608,6 +608,7 @@ void Univers::reassignCells() {
 
             if (cellX >= 0 && cellX < cellules.size() && cellY >= 0 && cellY < cellules.size()) {
                 int newCellIndex = cellX + cellY * (L1 / rCut);
+                std :: cout << "index" << newCellIndex <<std::endl;
                 cellules[newCellIndex].addParticule(p);
             } else {
                 std::cerr << "Particle out of bounds: " << p.getId() << std::endl;
@@ -659,7 +660,8 @@ void Univers::evolution() {
 
         //Mise à jour des cellules
         //1. condition d'absorption
-        absorptionBC();
+        //absorptionBC();
+        reflexiveBC();
         reassignCells();
 
         if (t == dt) {
