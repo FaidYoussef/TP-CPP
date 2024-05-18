@@ -38,7 +38,7 @@ TEST(Particule3D, SettersAndGetters) {
     Vector3D velocity(7.0, 8.0, 9.0);
     p.setForce(force);
     p.setPos(position);
-    p.setVit(velocity.getX(), velocity.getY(), velocity.getZ());
+    p.setVit(velocity);
 
     EXPECT_EQ(p.getId(), 2);
     EXPECT_EQ(p.getMasse(), 5.0f);

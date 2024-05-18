@@ -28,7 +28,7 @@ TEST(Univers, Initialize2) {
     Univers u(2, 20, 20, 0, 2.5, 0.01, 1.0);
     
     // Initialize the universe with given particle parameters
-    u.initialiser2(4, 4, 4, 16);
+    u.initialiser2(4, 4, 4, 16, Vector3D(0, 0, 0), Vector3D(0, 0, 0));
     
     // Check if the number of cells is as expected
     EXPECT_EQ(u.getCellules().size(), 64); // 8x8 grid
@@ -66,6 +66,117 @@ TEST(Univers, GetSetMethods) {
     EXPECT_EQ(u.getCellules().size(), 1);
     EXPECT_EQ(u.getNbParticules(), 0); // No particles in the cell
 }
+
+
+TEST(Univers, PeriodicBoundaryConditions) {
+    // Create a universe with specific parameters
+    Univers u(2, 3, 3, 0, 1.0, 0.01, 1.0);
+    
+    // Set up particles near the boundaries
+    std::vector<Cellule> cellules = u.getCellules();
+    cellules.resize(9);
+
+    Cellule c1(0, 0, Vector3D(0, 0, 0));
+    Cellule c2(0, 2, Vector3D(10, 0, 0));
+    Cellule c3(2, 0, Vector3D(0, 10, 0));
+    Cellule c4(2, 2, Vector3D(10, 10, 0));
+
+    // Manually placing particles near the boundary
+    Particule3D p1(1, 1.0, 1, Vector3D(0, 0, 0), Vector3D(-0.1, -0.1, 0.0), Vector3D(0, 0, 0));
+    Particule3D p2(2, 1.0, 1, Vector3D(0, 0, 0), Vector3D(0.1, 3.1, 0.0), Vector3D(0, 0, 0));
+    Particule3D p3(3, 1.0, 1, Vector3D(0, 0, 0), Vector3D(3.1, 0.1, 0.0), Vector3D(0, 0, 0));
+    Particule3D p4(4, 1.0, 1, Vector3D(0, 0, 0), Vector3D(3.1, 3.1, 0.0), Vector3D(0, 0, 0));
+
+    c1.addParticule(p1); // Top-left corner
+    c2.addParticule(p2); // Top-right corner
+    c3.addParticule(p3); // Bottom-left corner
+    c4.addParticule(p4); // Bottom-right corner
+
+    cellules[0] = c1;
+    cellules[2] = c2;
+    cellules[6] = c3;
+    cellules[8] = c4;
+
+    u.setCellules(cellules);
+
+    // Apply periodic boundary conditions
+    u.periodicBC();
+
+    // Fetch the updated cellules and check positions of the particles
+    cellules = u.getCellules();
+
+    const double tolerance = 1e-6;
+
+
+    // Check positions after applying periodic boundary conditions
+    EXPECT_NEAR(cellules[0].getParticules()[0].getPos().getX(), 2.9, tolerance); // Wrapped from left to right
+    EXPECT_NEAR(cellules[0].getParticules()[0].getPos().getY(), 2.9, tolerance);
+
+    EXPECT_NEAR(cellules[2].getParticules()[0].getPos().getX(), 0.1, tolerance); // Wrapped from right to left
+    EXPECT_NEAR(cellules[2].getParticules()[0].getPos().getY(), 0.1, tolerance);
+
+    EXPECT_NEAR(cellules[6].getParticules()[0].getPos().getX(), 0.1, tolerance); // Wrapped from left to right
+    EXPECT_NEAR(cellules[6].getParticules()[0].getPos().getY(), 0.1, tolerance); // Wrapped from bottom to top
+
+    EXPECT_NEAR(cellules[8].getParticules()[0].getPos().getX(), 0.1, tolerance); // Wrapped from right to left
+    EXPECT_NEAR(cellules[8].getParticules()[0].getPos().getY(), 0.1, tolerance); // Wrapped from bottom to top
+}
+
+TEST(Univers, ReflexiveBoundaryConditions) {
+    // Create a universe with specific parameters
+    Univers u(2, 3, 3, 0, 1.0, 0.01, 1.0);
+    
+    // Set up particles near the boundaries
+    std::vector<Cellule> cellules = u.getCellules();
+    cellules.resize(9);
+
+    Cellule c1(0, 0, Vector3D(0, 0, 0));
+    Cellule c2(0, 2, Vector3D(10, 0, 0));
+    Cellule c3(2, 0, Vector3D(0, 10, 0));
+    Cellule c4(2, 2, Vector3D(10, 10, 0));
+
+    // Manually placing particles near the boundary
+    Particule3D p1(1, 1.0, 1, Vector3D(0, 0, 0), Vector3D(0.1, 0.1, 0.0), Vector3D(-1, 0, 0));
+    Particule3D p2(2, 1.0, 1, Vector3D(0, 0, 0), Vector3D(0.1, 2.1, 0.0), Vector3D(0, 1, 0));
+    Particule3D p3(3, 1.0, 1, Vector3D(0, 0, 0), Vector3D(2.1, 0.1, 0.0), Vector3D(1, 0, 0));
+    Particule3D p4(4, 1.0, 1, Vector3D(0, 0, 0), Vector3D(2.1, 2.1, 0.0), Vector3D(1, 1, 0));
+
+    c1.addParticule(p1); // Top-left corner
+    c2.addParticule(p2); // Top-right corner
+    c3.addParticule(p3); // Bottom-left corner
+    c4.addParticule(p4); // Bottom-right corner
+
+    cellules[0] = c1;
+    cellules[2] = c2;
+    cellules[6] = c3;
+    cellules[8] = c4;
+
+    u.setCellules(cellules);
+
+    // Apply periodic boundary conditions
+    u.periodicBC();
+
+    // Fetch the updated cellules and check positions of the particles
+    cellules = u.getCellules();
+
+    const double tolerance = 1e-6;
+
+
+    // Check positions after applying periodic boundary conditions
+    EXPECT_NEAR(cellules[0].getParticules()[0].getVit().getX(), 1.0, tolerance); // Reflected from left to right
+    EXPECT_NEAR(cellules[0].getParticules()[0].getVit().getY(), 0.0, tolerance);
+
+    EXPECT_NEAR(cellules[2].getParticules()[0].getVit().getY(), 0.0, tolerance); // Wrapped from right to left
+    EXPECT_NEAR(cellules[2].getParticules()[0].getVit().getX(), -1.0, tolerance);
+
+    EXPECT_NEAR(cellules[6].getParticules()[0].getVit().getX(), -1.0, tolerance); // Wrapped from left to right
+    EXPECT_NEAR(cellules[6].getParticules()[0].getVit().getX(), 0, tolerance); // Wrapped from bottom to top
+
+    EXPECT_NEAR(cellules[8].getParticules()[0].getVit().getX(), 1.0, tolerance); // Wrapped from right to left
+    EXPECT_NEAR(cellules[8].getParticules()[0].getVit().getX(), 1.0, tolerance); // Wrapped from bottom to top
+}
+
+
 
 // // Test calculForces method
 // TEST(Univers, CalculForces) {

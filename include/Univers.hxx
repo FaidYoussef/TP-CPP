@@ -19,7 +19,6 @@ class Univers {
         int L2;
         int L3;
         float rCut;
-        float t0;
         float dt;
         float tmax;
 
@@ -42,11 +41,16 @@ class Univers {
     void writeVTKFile(std::string filename);
 
     void calculForces(std::vector<Vector3D> & forcesOld);
-    void initialiser2(int dim1_rouge,int dim2_rouge, int dim1_bleue, int dim2_bleue);
+
+    void initialiser2(int dim1_rouge,int dim2_rouge, int dim1_bleue, int dim2_bleue, Vector3D vitesseRouge, Vector3D vitesseBleue);
 
     void evolution();
 
     void assignParticule(const Particule3D&,int nCellX);
+
+    void periodicBC();
+
+    void reflexiveBC();
 };
 
 #endif // UNIVERS_HXX
