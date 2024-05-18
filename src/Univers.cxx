@@ -56,7 +56,7 @@ Univers::Univers(int dimension, int L1, int L2, int L3,int eps,int sigma, float 
     } else {
         this->L2 = L2;
     }
-    
+
     this->nbParticules = 0;
 
     this->dt = dt;
@@ -164,8 +164,7 @@ void Univers::initialiser() {
     }
 }
 
-
-void Univers ::initialiser2() {
+void Univers ::initialiser2(int dim1_rouge,int dim2_rouge, int dim1_bleue, int dim2_bleue, Vector3D vitesse_bleue, Vector3D vitesse_rouge) {
     int nCellsX = L1 / rCut;
     int nCellsY = L2 / rCut;
     cellules.reserve(nCellsX*nCellsY);
@@ -180,34 +179,29 @@ void Univers ::initialiser2() {
         }
     }
 
-    //Génération des particules rouges et bleues
-    int dim_rouge = 40;
-    int dim1_bleue = 40;
-    int dim2_bleue = 100;
 
     std::vector<Particule3D> particules_bleues;
     particules_bleues.reserve(dim1_bleue*dim2_bleue);
     std::vector<Particule3D> particules_rouges;
-    particules_rouges.reserve(dim_rouge*dim_rouge);
+    particules_rouges.reserve(dim1_rouge*dim2_rouge);
 
-    Vector3D vitesse_bleue(0, 0, 0);
-    Vector3D vitesse_rouge(0, -10, 0);
+
 
     float distance = std::pow(2, 1.0/6.0);
 
-    for (int i = 0; i < dim_rouge; i++) {
-        for (int j = 0; j < dim_rouge; j++) {
-            Particule3D particule_rouge = Particule3D(i*dim_rouge + j, 1, 1, Vector3D(0, 0, 0), Vector3D(i*distance +  dim_rouge*distance, j*distance + 1.25*dim_rouge*distance, 0), vitesse_rouge);
+    for (int i = 0; i < dim1_rouge; i++) {
+        for (int j = 0; j < dim2_rouge; j++) {
+            Particule3D particule_rouge = Particule3D(i*dim2_rouge + j, 1, 1, Vector3D(0, 0, 0), Vector3D(i*distance + 2* dim1_bleue*distance, j*distance + dim1_rouge*distance, 0), vitesse_rouge);
             // print i*distance
             // std::cout << particule_rouge.getPos().getX() << std::endl;
-            particules_rouges.insert(particules_rouges.begin() + i*dim_rouge + j, particule_rouge);
+            particules_rouges.insert(particules_rouges.begin() + i*dim2_rouge + j, particule_rouge);
         }
     }
 
-    for  (int j = 0; j < dim1_bleue; j++)  {
-        for (int i = 0; i < dim2_bleue; i++){
-            Particule3D particule_bleue = Particule3D(i*dim1_bleue + j + dim_rouge*dim_rouge, 1, 0, Vector3D(0, 0, 0), Vector3D(i*distance, j*distance, 0), vitesse_bleue);
-            particules_bleues.insert(particules_bleues.begin() + j*dim2_bleue + i, particule_bleue);
+    for (int i = 0; i < dim1_bleue; i++) {
+        for (int j = 0; j < dim2_bleue; j++) {
+            Particule3D particule_bleue = Particule3D(i*dim2_bleue + j + dim1_rouge*dim2_rouge, 1, 0, Vector3D(0, 0, 0), Vector3D(i*distance, j*distance, 0), vitesse_bleue);
+            particules_bleues.insert(particules_bleues.begin() + i*dim2_bleue + j, particule_bleue);
         }
     }
 
@@ -501,6 +495,74 @@ void Univers::calculForces(std::vector<Vector3D> & forcesOld) {
 
 }
 
+
+void Univers::periodicBC() {
+    for (auto cellule = cellules.begin(); cellule != cellules.end(); cellule++) {
+        // verify if the cellule is in the domain boundary
+        int* id = cellule->getId();
+        if (id[0] == 0 || id[0] == L1 / rCut - 1 || id[1] == 0 || id[1] == L2 / rCut - 1) {
+            // get the particles of the cellule
+            std::vector<Particule3D> particules = cellule->getParticules();
+            // verify if the particule is out of the domain
+            for (auto p = particules.begin(); p != particules.end(); p++) {
+                Vector3D pos = p->getPos();
+                if (p->getPos().getX() < 0 || p->getPos().getX() > L1 ) {
+                    if (id[0] == 0) {
+                        pos.setX(pos.getX() + L1);
+                    } else if (id[0] == L1 / rCut - 1) {
+                        pos.setX(pos.getX() - L1);
+                    }
+                }
+                if (p->getPos().getY() < 0 || p->getPos().getY() > L2 ) {
+                    if (id[1] == 0) {
+                        pos.setY(pos.getY() + L2);
+                    } else if (id[1] == L2 / rCut - 1) {
+                        std::cout << "pos y : " << pos.getY() << std::endl;
+                        pos.setY(pos.getY() - L2);
+                        std::cout << "pos y : " << pos.getY() << std::endl;
+                    }
+                }
+                p->setPos(pos);
+                }
+                cellule->setParticules(particules);
+            }
+        }
+    }
+
+void Univers::reflexiveBC() {
+    for (auto cellule = cellules.begin(); cellule != cellules.end(); cellule++) {
+        // verify if the cellule is in the domain boundary
+        int* id = cellule->getId();
+        if (id[0] == 0 || id[0] == L1 / rCut - 1 || id[1] == 0 || id[1] == L2 / rCut - 1) {
+            // get the particles of the cellule
+            std::vector<Particule3D> particules = cellule->getParticules();
+            // verify if the particule is out of the domain
+            for (auto p = particules.begin(); p != particules.end(); p++) {
+                Vector3D pos = p->getPos();
+                Vector3D vit = p->getVit();
+                float masse = p->getMasse();
+                Vector3D force = p->getForce();
+                pos += (vit + force * dt * (0.5 / masse)) * dt;
+                // verify if the particule is out of the domain
+                if (pos.getX() < 0 || pos.getX() > L1 ) {
+                    if (pos.getX() < 0) {
+                        vit.setX(-vit.getX());
+                    } else if (pos.getX() > L1) {
+                        vit.setX(-vit.getX());
+                    }
+                    if (pos.getY() < 0) {
+                        vit.setY(-vit.getY());
+                    } else if (pos.getY() > L2) {
+                        vit.setY(-vit.getY());
+                    }
+                    p->setVit(vit);
+                }
+            }
+            cellule->setParticules(particules);
+        }
+    }
+}
+
 void Univers ::absorptionBC() {
     std ::cout <<"le sizeeeeeeee : "<<cellules.begin()->getParticules().size()<<std::endl;
         for (auto& cellule : cellules) {
@@ -616,12 +678,10 @@ void Univers::evolution() {
             Vector3D force = p.getForce();
             Vector3D forceOld = forcesOld[p.getId()];
             vit = vit + (force + forceOld) * dt * (0.5 / masse);
-            p.setVit(vit.getX(), vit.getY(), vit.getZ());
+            p.setVit(vit);
         }
          cellule.setParticules(particules);
     }
-
-
 
 
     // remplir le fichier data_t.vtu avec les nouvelles positions, vitesses et masses des particules
@@ -635,5 +695,3 @@ void Univers::evolution() {
 
     std::cout << "Evolution terminée" << std::endl;
     }
-
-

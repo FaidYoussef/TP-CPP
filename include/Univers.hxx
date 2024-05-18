@@ -14,6 +14,7 @@ class Univers {
         // une liste de particules
         //Tableau à une dimension , performante en termes de mémoire et d'accès
         std::vector<Cellule> cellules;
+        std::vector<Particule3D> particules;
         int L1;
         int L2;
         int L3;
@@ -47,7 +48,8 @@ class Univers {
     void writeVTKFile(std::string filename);
 
     void calculForces(std::vector<Vector3D> & forcesOld);
-    void initialiser2();
+
+    void initialiser2(int dim1_rouge,int dim2_rouge, int dim1_bleue, int dim2_bleue, Vector3D vitesseRouge, Vector3D vitesseBleue);
 
     void evolution();
 
@@ -58,6 +60,10 @@ class Univers {
 
     static void processCells(std::vector<Cellule> cellules, int gridWidth, int gridHeight);
     void printParticules();
+
+    void periodicBC();
+
+    void reflexiveBC();
 };
 
 #endif // UNIVERS_HXX
