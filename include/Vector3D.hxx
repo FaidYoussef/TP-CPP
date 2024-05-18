@@ -39,6 +39,7 @@ public:
     Vector3D operator*(const double& scalar) const;
     double operator*(const Vector3D& other) const;
     bool operator==(const Vector3D& other) const;
+    bool operator!=(const Vector3D& other) const;
 
     // Méthodes
     double norm() const;

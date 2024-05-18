@@ -79,3 +79,7 @@ double Vector3D::norm() const {
 bool Vector3D::operator==(const Vector3D& other) const {
     return x == other.x && y == other.y && z == other.z;
 }
+
+bool Vector3D::operator!=(const Vector3D& other) const {
+    return !(*this == other);
+}

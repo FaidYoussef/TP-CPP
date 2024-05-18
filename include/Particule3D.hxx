@@ -40,6 +40,7 @@ class Particule3D {
 
         // Opérateur de comparaison <
         bool operator<(const Particule3D& other) const;
+        bool operator==(const Particule3D &other) const;  // Operator ==
 };
 
 #endif 
