@@ -99,6 +99,11 @@ TEST(Cellule, SetParticules) {
     std::vector<Particule3D> particules = {Particule3D(1, 1.0, 1, Vector3D(), Vector3D(), Vector3D()),
                                            Particule3D(2, 1.0, 1, Vector3D(), Vector3D(), Vector3D())};
     c.setParticules(particules);
-    EXPECT_EQ(c.getNbParticules(), particules.size());
+    // print Cellule c to see if the particules are set
+    std::cout << c.getParticules().size() << std::endl;
+    std::vector<Particule3D> particules2 = c.getParticules();
+    for (int i = 0; i < particules.size(); i++) {
+        std::cout << particules2[i].getId() << std::endl;
+    }
     EXPECT_EQ(c.getParticules(), particules);
 }

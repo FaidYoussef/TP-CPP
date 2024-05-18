@@ -42,7 +42,7 @@ class Univers {
     void writeVTKFile(std::string filename);
 
     void calculForces(std::vector<Vector3D> & forcesOld);
-    void initialiser2();
+    void initialiser2(int dim1_rouge,int dim2_rouge, int dim1_bleue, int dim2_bleue);
 
     void evolution();
 

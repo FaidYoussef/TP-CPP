@@ -30,7 +30,7 @@ class Cellule {
     
     int getNbParticules() const;
     int* getId();
-    std::vector<Particule3D> getParticules();
+    std::vector<Particule3D>& getParticules();
     Vector3D getCentre() const;
     void setParticules(std::vector<Particule3D> particules);
     void addParticule(Particule3D particule);

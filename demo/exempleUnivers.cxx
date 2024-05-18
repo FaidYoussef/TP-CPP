@@ -18,7 +18,7 @@ int main() {
 
     Univers univers = Univers(3, 250, 45, 0, 2.5, 0.05, 1.95);
 
-    univers.initialiser2();
+    univers.initialiser2(4, 4, 4, 16);
     std :: vector<Cellule> cell = univers.getCellules();
     for (auto it = cell.begin() ; it != cell.end();it++)  {
         std :: cout << "********************************** "<< std :: endl;
