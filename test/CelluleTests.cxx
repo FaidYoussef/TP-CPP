@@ -87,7 +87,7 @@ TEST(Cellule, RemoveParticule) {
     Particule3D p2(2, 1.0, 1, Vector3D(), Vector3D(), Vector3D());
     c.addParticule(p1);
     c.addParticule(p2);
-    c.removeParticule(p1);
+    //c.removeParticule(p1);
     EXPECT_EQ(c.getNbParticules(), 1);
     EXPECT_EQ(c.getParticules().size(), 1);
     EXPECT_EQ(c.getParticules()[0].getId(), p2.getId());

@@ -8,8 +8,36 @@
 #include "Cellule.hxx"
 
 
-
 Univers::Univers(int dimension, int L1, int L2, int L3, float rCut, float dt, float tmax) {
+    if (dimension < 1 || dimension > 3) {
+        std::cerr << "Dimension invalide" << std::endl;
+        exit(1);
+    }
+    this->dimension = dimension;
+    this->cellules = std::vector<Cellule>();
+    this->rCut = rCut;
+    this->L1 = L1;
+    if (dimension < 3) {
+        this->L3 = 0;
+    } else {
+        this->L3 = L3;
+    }
+    if (dimension < 2) {
+        this->L2 = 0;
+    } else {
+        this->L2 = L2;
+    }
+
+    this->nbParticules = 0;
+
+    this->dt = dt;
+    this->tmax = tmax;
+    this->eps = 0;
+    this->sigma = 0;
+
+
+}
+Univers::Univers(int dimension, int L1, int L2, int L3,int eps,int sigma, float rCut, float dt, float tmax) {
     if (dimension < 1 || dimension > 3) {
         std::cerr << "Dimension invalide" << std::endl;
         exit(1);
@@ -33,14 +61,17 @@ Univers::Univers(int dimension, int L1, int L2, int L3, float rCut, float dt, fl
 
     this->dt = dt;
     this->tmax = tmax;
+    this->sigma = sigma;
+    this->eps = eps;
+
 }
 
 Univers::Univers() : dimension(0), nbParticules(0), cellules(std::vector<Cellule>()) {}
 
 void Univers::initialiser() {
-    int dim_rouge = 4;
-    int dim1_bleue = 4;
-    int dim2_bleue = 16;
+    int dim_rouge = 10;
+    int dim1_bleue = 15;
+    int dim2_bleue = 30;
 
     std::vector<Particule3D> particules_bleues;
     particules_bleues.reserve(dim1_bleue*dim2_bleue);
@@ -133,6 +164,7 @@ void Univers::initialiser() {
     }
 }
 
+
 void Univers ::initialiser2() {
     int nCellsX = L1 / rCut;
     int nCellsY = L2 / rCut;
@@ -149,9 +181,9 @@ void Univers ::initialiser2() {
     }
 
     //Génération des particules rouges et bleues
-    int dim_rouge = 4;
-    int dim1_bleue = 4;
-    int dim2_bleue = 16;
+    int dim_rouge = 40;
+    int dim1_bleue = 40;
+    int dim2_bleue = 100;
 
     std::vector<Particule3D> particules_bleues;
     particules_bleues.reserve(dim1_bleue*dim2_bleue);
@@ -159,23 +191,23 @@ void Univers ::initialiser2() {
     particules_rouges.reserve(dim_rouge*dim_rouge);
 
     Vector3D vitesse_bleue(0, 0, 0);
-    Vector3D vitesse_rouge(0, 10, 0);
+    Vector3D vitesse_rouge(0, -10, 0);
 
     float distance = std::pow(2, 1.0/6.0);
 
     for (int i = 0; i < dim_rouge; i++) {
         for (int j = 0; j < dim_rouge; j++) {
-            Particule3D particule_rouge = Particule3D(i*dim_rouge + j, 1, 1, Vector3D(0, 0, 0), Vector3D(i*distance + 2* dim1_bleue*distance, j*distance + dim_rouge*distance, 0), vitesse_rouge);
+            Particule3D particule_rouge = Particule3D(i*dim_rouge + j, 1, 1, Vector3D(0, 0, 0), Vector3D(i*distance +  dim_rouge*distance, j*distance + 1.25*dim_rouge*distance, 0), vitesse_rouge);
             // print i*distance
             // std::cout << particule_rouge.getPos().getX() << std::endl;
             particules_rouges.insert(particules_rouges.begin() + i*dim_rouge + j, particule_rouge);
         }
     }
 
-    for (int i = 0; i < dim1_bleue; i++) {
-        for (int j = 0; j < dim2_bleue; j++) {
-            Particule3D particule_bleue = Particule3D(i*dim2_bleue + j + dim_rouge*dim_rouge, 1, 0, Vector3D(0, 0, 0), Vector3D(i*distance, j*distance, 0), vitesse_bleue);
-            particules_bleues.insert(particules_bleues.begin() + i*dim2_bleue + j, particule_bleue);
+    for  (int j = 0; j < dim1_bleue; j++)  {
+        for (int i = 0; i < dim2_bleue; i++){
+            Particule3D particule_bleue = Particule3D(i*dim1_bleue + j + dim_rouge*dim_rouge, 1, 0, Vector3D(0, 0, 0), Vector3D(i*distance, j*distance, 0), vitesse_bleue);
+            particules_bleues.insert(particules_bleues.begin() + j*dim2_bleue + i, particule_bleue);
         }
     }
 
@@ -195,8 +227,11 @@ void Univers ::initialiser2() {
     std::cout << "nCd2 : " << nCellsY << std::endl;
     // print nCellsX*nCells
     std::cout << "nCellsX*nCd2 : " << nCellsX*nCellsY << std::endl;
-
-
+    std :: cout <<"Nobmre dogk" << nbParticules <<std::endl;
+    if (nbParticules < particules_bleues.size() + particules_rouges.size()) {
+        std::cout << "Erreur dans les cellules" << std::endl;
+        exit(1);
+    }
 }
 
 void Univers :: assignParticule(const Particule3D& particule,int nCellsX) {
@@ -285,6 +320,8 @@ void Univers::writeVTKFile(std::string filename) {
     file << "      <PointData Vectors=\"vector\">" << std::endl;
     file << "        <DataArray type=\"Float32\" Name=\"Velocity\" NumberOfComponents=\"" << dimension << "\" format=\"ascii\">" << std::endl;
     // Ajouter les vitesses des particules
+
+
     for (auto ite = cellules.begin(); ite != cellules.end(); ite++) {
         std::vector<Particule3D> particules = ite->getParticules();
         for (auto it = particules.begin(); it != particules.end(); it++) {
@@ -298,6 +335,7 @@ void Univers::writeVTKFile(std::string filename) {
             }
         }
     }
+
     file << std::endl;
     file << "        </DataArray>" << std::endl;
     file << "        <DataArray type=\"Float32\" Name=\"Masse\" format=\"ascii\">" << std::endl;
@@ -326,16 +364,41 @@ void Univers::writeVTKFile(std::string filename) {
 
     file.close();
 }
+// The function to process cells and their neighbors
+void Univers:: processCells(std::vector<Cellule> cellules, int gridWidth, int gridHeight) {
+    std::vector<std::vector<int>> offsets = {{1, 0}, {0, 1}, {1, 1}, {1, -1}};
+
+    for (auto &cellule : cellules) {
+        const int* id = cellule.getId();
+        std::vector<Particule3D> particules_voisines = cellule.getParticules();
+
+        for (auto& offset : offsets) {
+            int neighborX = id[0] + offset[0];
+            int neighborY = id[1] + offset[1];
+
+            if (neighborX >= 0 && neighborX < gridWidth && neighborY >= 0 && neighborY < gridHeight) {
+                auto& neighborCell = cellules[neighborX + gridWidth * neighborY];
+                std::vector<Particule3D> neighborParticles = neighborCell.getParticules();
+                particules_voisines.insert(particules_voisines.end(), neighborParticles.begin(), neighborParticles.end());
+            }
+        }
+
+        // Output to demonstrate function
+        std::cout << "Cell at (" << id[0] << ", " << id[1] << ") has " << particules_voisines.size() << " including neighbors." << std::endl;
+    }
+}
+
+
 
 void Univers::calculForces(std::vector<Vector3D> & forcesOld) {
-    std::cout << "taille forcesOld : " << forcesOld.size() << std::endl;
+    //forcesOld.resize(nbParticules);
     std::cout << "nbParticules : " << nbParticules << std::endl;
-    //forcesOld.reserve(nbParticules);
+
     for (auto cellule = cellules.begin(); cellule != cellules.end(); cellule++) {
           std::vector<Particule3D> particules = cellule->getParticules();
          for (auto p = particules.begin(); p != particules.end(); p++) {
              // stocker chaque force à la id-ième position de la liste des forcesOld
-            // forcesOld[it->getId()] = it->getForce();
+
             int id = p->getId();
             if (id >= 0 && id < forcesOld.size()) {
                 forcesOld[id] = p->getForce();
@@ -346,16 +409,17 @@ void Univers::calculForces(std::vector<Vector3D> & forcesOld) {
         }
     }
 
-    // Assuming cellules are stored in a 2D grid manner or can be translated as such
-    int gridWidth = L1 / rCut; // Width of the grid
-    int gridHeight = L2 / rCut; // Height of the grid
+    int gridWidth = L1 / rCut;
+    int gridHeight = L2 / rCut;
     for (auto cellule = cellules.begin(); cellule != cellules.end(); cellule++) {
-        int* id = cellule->getId(); // Assuming getId() now returns a std::vector<int> or std::array<int, 2>
+        int* id = cellule->getId();
 
         std::vector<Particule3D> particules_voisines = cellule->getParticules(); // Start with current cell particles
 
         // Positions to check for neighboring cells
-        std::vector<std::vector<int>> offsets = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1,1},{1,-1},{-1,-1},{-1,1}};
+        //let (nx,ny) be the offset , if we look at (nx,ny) ,we don't need to look at (-nx,-ny)
+        // this will solve the problem double counting interactions
+        std::vector<std::vector<int>> offsets = {{1, 0}, {0, 1}, {1,1},{1,-1}};
 
         for (auto& offset : offsets) {
             int neighborX = id[0] + offset[0];
@@ -363,16 +427,11 @@ void Univers::calculForces(std::vector<Vector3D> & forcesOld) {
 
             // Check if the neighbor coordinates are within the grid bounds
             if (neighborX >= 0 && neighborX < gridWidth && neighborY >= 0 && neighborY < gridHeight) {
-                auto neighborCell = std::find_if(cellules.begin(), cellules.end(), [&](Cellule c) {
-                    int * neighborId = c.getId();
-                    return neighborId[0] == neighborX && neighborId[1] == neighborY;
-                });
-
-                if (neighborCell != cellules.end()) {
+                    auto & neighborCell = cellules[neighborX + gridWidth*neighborY];
                     // Add all particles from this neighbor to the list of neighboring particles
-                    std::vector<Particule3D> neighborParticles = neighborCell->getParticules();
+                    std::vector<Particule3D> neighborParticles = neighborCell.getParticules();
                     particules_voisines.insert(particules_voisines.end(), neighborParticles.begin(), neighborParticles.end());
-                }
+
             }
         }
 
@@ -385,15 +444,49 @@ void Univers::calculForces(std::vector<Vector3D> & forcesOld) {
             const Vector3D pos_i = p1.getPos();
 
             for (auto &p2 : particules_voisines) {
+
+
                 const double masse_j = p2.getMasse();
                 const Vector3D pos_j = p2.getPos();
                 Vector3D force_2 = p2.getForce();
                 const Vector3D r = pos_i - pos_j;
                 const double norme_r = r.norm();
 
-                if (norme_r != 0.0) { // Avoid division by zero
+                if (norme_r != 0.0 ) { // Avoid division by zero
+                    //Force gravitationnelle
                     force_1 += r * (masse_i * masse_j / (norme_r * norme_r * norme_r));
                     force_2 += r * (masse_i * masse_j / (norme_r * norme_r * norme_r)) * (-1);
+                    //Force d'intercation
+                    double powTo6 = std::pow(sigma/norme_r,6);
+
+                    force_1 += r * 24 * eps  * std::pow(1/norme_r,2) * powTo6  *(1-2*powTo6) ;
+                    force_2 += r * 24 * eps  * std::pow(1/norme_r,2) * powTo6  *(1-2*powTo6)* (-1);
+
+                    if (force_1.getX()>1e5 ) {
+                        force_1.setX(1e5) ;
+                    }
+                    if (force_1.getY()>1e5) {
+                        force_1.setY(1e5);
+                    }
+                    if (force_1.getX()<-1e5 ) {
+                        force_1.setX(-1e5) ;
+                    }
+                    if (force_1.getY()<-1e5) {
+                        force_1.setY(-1e5);
+                    }
+                    if (force_2.getX()>1e5 ) {
+                        force_2.setX(1e5) ;
+                    }
+                    if (force_2.getY()>1e5) {
+                        force_2.setY(1e5);
+                    }
+                    if (force_2.getX()<-1e5 ) {
+                        force_2.setX(-1e5) ;
+                    }
+                    if (force_2.getY()<-1e5) {
+                        force_2.setY(-1e5);
+                    }
+
                 }
                 p2.setForce(force_2);
             }
@@ -407,6 +500,61 @@ void Univers::calculForces(std::vector<Vector3D> & forcesOld) {
 
 
 }
+
+void Univers ::absorptionBC() {
+    std ::cout <<"le sizeeeeeeee : "<<cellules.begin()->getParticules().size()<<std::endl;
+        for (auto& cellule : cellules) {
+            auto& particules =  cellule.getParticules();
+
+            for (int i = (int)particules.size() - 1 ;i>=0 ;--i) {
+                auto & p = particules[i];
+                //Check the boundary conditions
+                if (p.getPos().getX() < 0 || p.getPos().getX() > L1 ||
+                    p.getPos().getY() < 0 || p.getPos().getY() > L2) {
+                    std::cout << "Removing particle at index: " << i << std::endl;
+                    cellule.removeParticule(i);
+                    nbParticules--;
+
+                }
+            }
+
+        }
+
+
+
+}
+
+void Univers::reassignCells() {
+    // Collect all particles from all cells
+    std::vector<Particule3D> allParticules;
+    for (auto& cellule : cellules) {
+        auto particules = cellule.getParticules();
+        allParticules.insert(allParticules.end(), particules.begin(), particules.end());
+    }
+
+    // Clear all cells
+    for (auto& cellule : cellules) {
+        cellule.clearParticules();
+    }
+
+
+    // Reassign particles to the correct cells based on their positions
+
+    for (auto& p : allParticules) {
+            int cellX = (int)(p.getPos().getX() / rCut);
+            int cellY = (int)(p.getPos().getY() / rCut);
+
+            if (cellX >= 0 && cellX < cellules.size() && cellY >= 0 && cellY < cellules.size()) {
+                int newCellIndex = cellX + cellY * (L1 / rCut);
+                cellules[newCellIndex].addParticule(p);
+            } else {
+                std::cerr << "Particle out of bounds: " << p.getId() << std::endl;
+            }
+        }
+
+}
+
+
 
 void Univers::evolution() {
 
@@ -422,7 +570,7 @@ void Univers::evolution() {
     calculForces(forcesOld);
 
     // Initialisation du temps
-    float t = 0.;
+    float t = 0;
     int file_index = 0;
     while (t < tmax) {
         std::cout << "t = " << t << std::endl;  
@@ -440,11 +588,22 @@ void Univers::evolution() {
                 Vector3D force = p->getForce();
                 pos += (vit + force * dt * (0.5 / masse)) * dt;
                 p->setPos(pos);
+
             }
+
             // à revoir si c'est utile
             cellule->setParticules(particules);
         }
 
+        //Mise à jour des cellules
+        //1. condition d'absorption
+        absorptionBC();
+        reassignCells();
+
+        if (t == dt) {
+            std ::cout <<"le sizeeeeeeee endddddddd : "<<cellules.begin()->getParticules().size()<<std::endl;
+
+        }
 
 
     calculForces(forcesOld);
@@ -455,12 +614,14 @@ void Univers::evolution() {
             Vector3D vit = p.getVit();
             float masse = p.getMasse();
             Vector3D force = p.getForce();
-            Vector3D forceOld = *(std::next(forcesOld.begin(), p.getId()));
+            Vector3D forceOld = forcesOld[p.getId()];
             vit = vit + (force + forceOld) * dt * (0.5 / masse);
             p.setVit(vit.getX(), vit.getY(), vit.getZ());
         }
          cellule.setParticules(particules);
     }
+
+
 
 
     // remplir le fichier data_t.vtu avec les nouvelles positions, vitesses et masses des particules
@@ -474,3 +635,5 @@ void Univers::evolution() {
 
     std::cout << "Evolution terminée" << std::endl;
     }
+
+

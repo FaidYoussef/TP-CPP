@@ -73,12 +73,12 @@ void Cellule::addParticule(Particule3D particule) {
     nbParticules++;
 }
 
-void Cellule::removeParticule(Particule3D particule) {
-    for (int i = 0; i < nbParticules; i++) {
-        if (particules[i].getId() == particule.getId()) {
-            particules.erase(particules.begin() + i);
-            nbParticules--;
-            break;
-        }
-    }
+void Cellule::removeParticule(int index) {
+    particules.erase(particules.begin() + index);
 }
+
+void Cellule::clearParticules() {
+    particules.clear();
+}
+
+

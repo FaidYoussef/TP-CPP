@@ -14,10 +14,11 @@ class Univers {
         // une liste de particules
         //Tableau à une dimension , performante en termes de mémoire et d'accès
         std::vector<Cellule> cellules;
-        std::vector<Particule3D> particules;
         int L1;
         int L2;
         int L3;
+        int eps;
+        int sigma;
         float rCut;
         float t0;
         float dt;
@@ -25,6 +26,9 @@ class Univers {
 
     public:
         Univers(int dimension, int L1, int L2, int L3, float rCut, float dt, float tmax);
+
+        Univers(int dimension, int L1, int L2, int L3,int eps,int sigma, float rCut, float dt, float tmax);
+
         Univers();
     
     int getDimension() const;
@@ -36,6 +40,7 @@ class Univers {
     float getRCut() const;
 
     void setCellules(std::vector<Cellule> cellules);
+    void addCellule(const Cellule& cell) { cellules.push_back(cell); }
 
     void initialiser();
 
@@ -47,6 +52,12 @@ class Univers {
     void evolution();
 
     void assignParticule(const Particule3D&,int nCellX);
+
+    void absorptionBC();
+    void reassignCells();
+
+    static void processCells(std::vector<Cellule> cellules, int gridWidth, int gridHeight);
+    void printParticules();
 };
 
 #endif // UNIVERS_HXX
