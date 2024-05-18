@@ -23,12 +23,20 @@ TEST(Univers, DefaultConstructor) {
 }
 
 // Test initialiser2 method
-// TEST(Univers, Initialiser2) {
-//     Univers u(2, 20, 20, 0, 2.5, 0.01, 1.0);
-//     u.initialiser2();
-//     EXPECT_EQ(u.getCellules().size(), 64); // 8x8 grid
-//     EXPECT_EQ(u.getNbParticules(), 4*4 + 4*16); // Number of red and blue particles
-// }
+TEST(Univers, Initialize2) {
+    // Create the universe with 2 dimensions and specified parameters
+    Univers u(2, 20, 20, 0, 2.5, 0.01, 1.0);
+    
+    // Initialize the universe with given particle parameters
+    u.initialiser2(4, 4, 4, 16);
+    
+    // Check if the number of cells is as expected
+    EXPECT_EQ(u.getCellules().size(), 64); // 8x8 grid
+    
+    // Check if the number of particles is as expected
+    EXPECT_EQ(u.getNbParticules(), 4 * 4 + 4 * 16); // Number of red and blue particles
+
+}
 
 // Test assignParticule method
 TEST(Univers, AssignParticule) {
