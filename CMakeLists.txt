@@ -21,7 +21,7 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 ## Parcours les sous répertoires contenant les définitions (.cxx)
 ## On commence par créer une bibliothèque
 add_subdirectory(src)
-# add_subdirectory(doc)
+add_subdirectory(doc)
 add_subdirectory(demo)
 
 ## On créée les tests pour la bibliothèque.
