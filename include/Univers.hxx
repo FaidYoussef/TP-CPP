@@ -49,15 +49,15 @@ class Univers {
     void setCellules(std::vector<Cellule> cellules);
     void addCellule(const Cellule& cell) { cellules.push_back(cell); }
 
-    void initialiser();
 
     void writeVTKFile(std::string filename);
 
     void calculForces();
     void calculForces3D();
 
-    void initialiser2(int dim1_rouge,int dim2_rouge, int dim1_bleue, int dim2_bleue, Vector3D vitesseRouge, Vector3D vitesseBleue);
-    void initialiser3(int dim1_bleue, int dim2_bleue, float rayon_rouge, Vector3D vitesse_bleue, Vector3D vitesse_rouge) ;
+    void initialiser(int dim1_rouge,int dim2_rouge, int dim1_bleue, int dim2_bleue, const Vector3D& vitesseBleue, const Vector3D& vitesseRouge);
+
+    void initialiserDemoCercle(int dim1_bleue, int dim2_bleue, float rayon_rouge, Vector3D vitesse_bleue, Vector3D vitesse_rouge) ;
 
     void assignParticule(const Particule3D&,int nCellsX);
 

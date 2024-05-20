@@ -146,102 +146,7 @@ Univers::Univers(int dimension, int L1, int L2, int L3, int eps, int sigma, floa
  */
 Univers::Univers() : dimension(0), nbParticules(0), cellules(std::vector<Cellule>()) {}
 
-/**
- * @brief Initializes the simulation with particles.
- */
-void Univers::initialiser() {
-    int dim_rouge = 10;
-    int dim1_bleue = 15;
-    int dim2_bleue = 30;
 
-    std::vector<Particule3D> particules_bleues;
-    particules_bleues.reserve(dim1_bleue * dim2_bleue);
-    std::vector<Particule3D> particules_rouges;
-    particules_rouges.reserve(dim_rouge * dim_rouge);
-
-    Vector3D vitesse_bleue = Vector3D(0, 0, 0);
-    Vector3D vitesse_rouge = Vector3D(0, 10, 0);
-    float distance = std::pow(2, 1.0 / 6.0);
-
-    // Initialize red particles in a grid
-    for (int i = 0; i < dim_rouge; i++) {
-        for (int j = 0; j < dim_rouge; j++) {
-            Particule3D particule_rouge = Particule3D(i * dim_rouge + j, 1, 1, Vector3D(0, 0, 0), Vector3D(i * distance, j * distance, 0), vitesse_rouge);
-            particules_rouges.push_back(particule_rouge);
-        }
-    }
-
-    // Initialize blue particles in a grid
-    for (int i = 0; i < dim2_bleue; i++) {
-        for (int j = 0; j < dim1_bleue; j++) {
-            Particule3D particule_bleue = Particule3D(i * dim1_bleue + j + dim_rouge * dim_rouge, 1, 0, Vector3D(0, 0, 0), Vector3D(i * distance, j * distance, 0), vitesse_bleue);
-            particules_bleues.push_back(particule_bleue);
-        }
-    }
-
-    int nCd1 = L1 / rCut;
-    int nCd2 = L2 / rCut;
-
-    std::cout << "nCd1 : " << nCd1 << std::endl;
-    std::cout << "nCd2 : " << nCd2 << std::endl;
-    std::cout << "nCd1*nCd2 : " << nCd1 * nCd2 << std::endl;
-
-    cellules.reserve(nCd1 * nCd2);
-    for (int i = 0; i < nCd1; i++) {
-        for (int j = 0; j < nCd2; j++) {
-            Vector3D centre = Vector3D((i + 0.5) * rCut, (j + 0.5) * rCut, 0);
-            std::vector<Particule3D> particules;
-
-            // Assign blue particles to cells
-            for (auto& particule : particules_bleues) {
-                if (std::abs(particule.getPos().getX() - centre.getX()) <= rCut / 2.0 && std::abs(particule.getPos().getY() - centre.getY()) <= rCut / 2.0) {
-                    particules.push_back(particule);
-                }
-            }
-
-            // Assign red particles to cells
-            for (auto& particule : particules_rouges) {
-                if (std::abs(particule.getPos().getX() - centre.getX()) <= rCut / 2.0 && std::abs(particule.getPos().getY() - centre.getY()) <= rCut / 2.0) {
-                    particules.push_back(particule);
-                }
-            }
-
-            Cellule cellule = Cellule(i, j, centre, particules);
-            cellules.push_back(cellule);
-        }
-    }
-
-    // Print coordinates of particles not in cells
-    for (auto& particule : particules_rouges) {
-        bool inCell = false;
-        for (auto& cellule : cellules) {
-            for (auto& cellule_particule : cellule.getParticules()) {
-                if (particule.getId() == cellule_particule.getId()) {
-                    inCell = true;
-                    break;
-                }
-            }
-            if (inCell) {
-                break;
-            }
-        }
-        if (!inCell) {
-            std::cout << "Red particle not in a cell: " << particule.getPos().getX() << " " << particule.getPos().getY() << std::endl;
-        }
-    }
-
-    // Print the center with the largest coordinates
-    std::cout << "Center with the largest coordinates: " << cellules.back().getCentre().getX() << " " << cellules.back().getCentre().getY() << std::endl;
-
-    // Count the number of particles in cells
-    for (auto& cellule : cellules) {
-        nbParticules += cellule.getNbParticules();
-    }
-    if (nbParticules < particules_bleues.size() + particules_rouges.size()) {
-        std::cerr << "Error in cells" << std::endl;
-        exit(1);
-    }
-}
 
 /**
  * @brief Initializes the simulation with specific dimensions and velocities.
@@ -253,7 +158,7 @@ void Univers::initialiser() {
  * @param vitesse_bleue The initial velocity of the blue particles.
  * @param vitesse_rouge The initial velocity of the red particles.
  */
-void Univers::initialiser2(int dim1_rouge, int dim2_rouge, int dim1_bleue, int dim2_bleue, Vector3D vitesse_bleue, Vector3D vitesse_rouge) {
+void Univers::initialiser(int dim1_rouge, int dim2_rouge, int dim1_bleue, int dim2_bleue, const Vector3D& vitesse_rouge, const Vector3D& vitesse_bleue) {
     int nCellsX = L1 / rCut;
     int nCellsY = L2 / rCut;
     cellules.reserve(nCellsX * nCellsY);
@@ -318,14 +223,14 @@ void Univers::initialiser2(int dim1_rouge, int dim2_rouge, int dim1_bleue, int d
  * @param vitesse_bleue The initial velocity of the blue particles.
  * @param vitesse_rouge The initial velocity of the red particles.
  */
-void Univers::initialiser3(int dim1_bleue, int dim2_bleue, float rayon_rouge, Vector3D vitesse_bleue, Vector3D vitesse_rouge) {
+void Univers::initialiserDemoCercle(int dim1_bleue, int dim2_bleue, float rayon_rouge, Vector3D vitesse_bleue, Vector3D vitesse_rouge) {
     int nCellsX = L1 / rCut;
     int nCellsY = L2 / rCut;
     cellules.reserve(nCellsX * nCellsY);
 
     // Create all cells
-    for (int i = 0; i < nCellsX; i++) {
-        for (int j = 0; j < nCellsY; j++) {
+    for (int j = 0; j < nCellsY; j++) {
+        for (int i = 0; i < nCellsY; i++) {
             Vector3D centre((i + 0.5) * rCut, (j + 0.5) * rCut, 0);
             Cellule cellule(i, j, centre);
             cellules.push_back(cellule);
@@ -340,20 +245,22 @@ void Univers::initialiser3(int dim1_bleue, int dim2_bleue, float rayon_rouge, Ve
 
     // Initialize red particles in a disk
     int num_particules_rouges = static_cast<int>(M_PI * std::pow(rayon_rouge / distance, 2));
+
+    particules_rouges.reserve(num_particules_rouges);
+
     for (int i = 0; i < num_particules_rouges; i++) {
         float r = rayon_rouge * std::sqrt(static_cast<float>(rand()) / RAND_MAX);
         float theta = 2 * M_PI * static_cast<float>(rand()) / RAND_MAX;
-        float x = r * cos(theta) + L1 / 3;
-        float y = r * sin(theta) + L2 / 2;
-        std::cout << "x : " << x << " y : " << y << std::endl;
+        float x = r * cos(theta) + distance * dim2_bleue/2;
+        float y =  r * sin(theta)  +  distance * dim1_bleue + 2*r;
         Particule3D particule_rouge = Particule3D(i + dim1_bleue * dim2_bleue, 1, 1, Vector3D(0, 0, 0), Vector3D(x, y, 0), vitesse_rouge);
         particules_rouges.push_back(particule_rouge);
     }
 
     // Initialize blue particles in a rectangle
-    for (int i = 0; i < dim1_bleue; i++) {
-        for (int j = 0; j < dim2_bleue; j++) {
-            Particule3D particule_bleue = Particule3D(i * dim2_bleue + j, 1, 0, Vector3D(0, 0, 0), Vector3D(i * distance + L1 / 4, j * distance + L2 / 4, 0), vitesse_bleue);
+    for (int j = 0; j< dim1_bleue; j++) {
+        for (int i = 0; i < dim2_bleue; i++) {
+            Particule3D particule_bleue = Particule3D(i  + j * dim2_bleue, 1, 0, Vector3D(0, 0, 0), Vector3D(i * distance , j * distance , 0), vitesse_bleue);
             particules_bleues.push_back(particule_bleue);
         }
     }
@@ -512,7 +419,7 @@ void Univers::writeVTKFile(std::string filename) {
     file << "      </Points>" << std::endl;
     file << "      <PointData Vectors=\"vector\">" << std::endl;
     file << "        <DataArray type=\"Float32\" Name=\"Velocity\" NumberOfComponents=\"" << dimension << "\" format=\"ascii\">" << std::endl;
-
+    int k =0;
     // Add particle velocities
     for (auto ite = cellules.begin(); ite != cellules.end(); ite++) {
         std::vector<Particule3D> particules = ite->getParticules();
@@ -525,8 +432,10 @@ void Univers::writeVTKFile(std::string filename) {
             } else {
                 file << vit.getX() << " " << vit.getY() << " " << vit.getZ() << " ";
             }
+            k++;
         }
     }
+    std::cout<<k<<std::endl;
 
     file << std::endl;
     file << "        </DataArray>" << std::endl;
@@ -759,7 +668,7 @@ void Univers::periodicBC() {
             if (posOldZ < 0) {
                 pos.setZ(L3 - std::abs(fmod(posOldZ, L3)));
             }
-            if (posOldZ >= L3) {
+            if (posOldZ >= L3 && L3!=0) {
                 pos.setZ(fmod(posOldZ, L3));
             }
 
@@ -987,25 +896,35 @@ void Univers::evolution2D() {
                 Vector3D vit = p.getVit();
                 float masse = p.getMasse();
                 Vector3D force = p.getForce();
-                pos += (vit + force * dt * (0.5 / masse)) * dt;
 
-                // Reflection boundary conditions
-                if (pos.getX() < 0 || pos.getX() > L1) {
-                    vit.setX(-vit.getX());
-                    pos = p.getPos() + (vit + force * dt * (0.5 / masse)) * dt;
+
+                if (boundaryCond == 2) {
+                    Vector3D v = pos;
+                    v += (vit + force * dt * (0.5 / masse)) * dt;
+                    // Reflection boundary conditions
+                    if (v.getX() < 0 || v.getX() > L1) {
+                        vit.setX(-vit.getX());
+                    }
+                    if (pos.getY() < 0 || pos.getY() > L2) {
+                        vit.setY(-vit.getY());
+                    }
+                    p.setVit(vit);
+                    pos += (p.getVit() + force * dt * (0.5 / masse)) * dt;
+                    p.setPos(pos);
+                    absorptionBC();
                 }
-                if (pos.getY() < 0 || pos.getY() > L2) {
-                    vit.setY(-vit.getY());
-                    pos = p.getPos() + (vit + force * dt * (0.5 / masse)) * dt;
+                else {
+                    pos += (p.getVit() + force * dt * (0.5 / masse)) * dt;
+                    p.setPos(pos);
                 }
 
-                p.setVit(vit);
-                p.setPos(pos);
 
                 int id = p.getId();
                 if (id >= 0 && id < forcesOld.size()) {
-                    forcesOld[id] = p.getForce();
+                        forcesOld[id] = p.getForce();
                 }
+
+
             }
             cellule.setParticules(par);
         }
@@ -1014,6 +933,7 @@ void Univers::evolution2D() {
         if (boundaryCond == 0) {
             absorptionBC();
         } else if (boundaryCond == 1) {
+            std::cout <<"here" <<std::endl;
             periodicBC();
         }
 
@@ -1040,10 +960,12 @@ void Univers::evolution2D() {
         // Write to VTK file
         filename = "data_t" + std::to_string(file_index) + ".vtu";
         writeVTKFile(filename);
+        std::cout << "Pourcentage de l'évolution : " << (t -dt) / tmax * 100 << "%" << std::endl;
 
     }
 
     std::cout << "Evolution completed" << std::endl;
+
 }
 
 /**
@@ -1067,7 +989,6 @@ void Univers::evolution3D() {
     int iter = 0;
     float t = 0;
     int file_index = 0;
-    int visStepsPerFrame = round(1.0 / (30 * dt));
 
     // Time evolution loop
     while (t < tmax) {
@@ -1101,29 +1022,33 @@ void Univers::evolution3D() {
                 Vector3D vit = p.getVit();
                 float masse = p.getMasse();
                 Vector3D force = p.getForce();
-                pos += (vit + force * dt * (0.5 / masse)) * dt;
 
-                // Reflection boundary conditions
-                if (pos.getX() < 0 || pos.getX() > L1) {
-                    vit.setX(-vit.getX());
-                    pos = p.getPos() + (vit + force * dt * (0.5 / masse)) * dt;
-                }
-                if (pos.getY() < 0 || pos.getY() > L2) {
-                    vit.setY(-vit.getY());
-                    pos = p.getPos() + (vit + force * dt * (0.5 / masse)) * dt;
-                }
-                if (pos.getZ() < 0 || pos.getZ() > L3) {
-                    vit.setZ(-vit.getZ());
-                    pos = p.getPos() + (vit + force * dt * (0.5 / masse)) * dt;
-                }
 
-                p.setVit(vit);
+                if (boundaryCond == 2) {
+                    Vector3D v = pos;
+                    v += (vit + force * dt * (0.5 / masse)) * dt;
+                    // Reflection boundary conditions
+                    if (v.getX() < 0 || v.getX() > L1) {
+                        vit.setX(-vit.getX());
+                        pos = p.getPos() + (vit + force * dt * (0.5 / masse)) * dt;
+                    }
+                    if (pos.getY() < 0 || pos.getY() > L2) {
+                        vit.setY(-vit.getY());
+                        pos = p.getPos() + (vit + force * dt * (0.5 / masse)) * dt;
+                    }
+                    p.setVit(vit);
+                }
+                else {
+                    pos += (vit + force * dt * (0.5 / masse)) * dt;
+                }
                 p.setPos(pos);
 
                 int id = p.getId();
                 if (id >= 0 && id < forcesOld.size()) {
                     forcesOld[id] = p.getForce();
                 }
+
+
             }
             cellule.setParticules(par);
         }
@@ -1159,6 +1084,9 @@ void Univers::evolution3D() {
 
         filename = "data_t" + std::to_string(file_index) + ".vtu";
         writeVTKFile(filename);
+        // print le pourcentage de l'évolution
+        std::cout << "Pourcentage de l'évolution : " << (t -dt) / tmax * 100 << "%" << std::endl;
+
 
     }
 
@@ -1172,9 +1100,9 @@ void Univers::evolution3D() {
  * This function selects the appropriate evolution function based on the dimensionality of the system.
  */
 void Univers::evolution() {
-    if (dimension == 2) {
+    if (dimension == 2 || L3 ==0) {
         evolution2D();
-    } else if (dimension == 3) {
+    } else if (dimension == 3 && L3!=0) {
         evolution3D();
     } else {
         std::cerr << "Unsupported dimension: " << dimension << std::endl;
