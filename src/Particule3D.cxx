@@ -46,8 +46,9 @@ bool Particule3D::operator<(const Particule3D& other) const {
     return id < other.id;
 }
 
-bool Particule3D::operator==(const Particule3D &other) const{
-    return id == other.id;
+
+bool Particule3D::operator==(const Particule3D& other) const {
+    return this->id == other.id;
 }
 
 void Particule3D::setPos(Vector3D pos) {

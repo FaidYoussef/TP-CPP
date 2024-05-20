@@ -3,6 +3,7 @@
 #include <cmath>
 #include <iostream>
 #include <fstream>
+#include "algorithm"
 
 Cellule::Cellule(int id_1, int id_2, Vector3D centre, std::vector<Particule3D> particules) {
     this->id[0] = id_1;
@@ -73,9 +74,24 @@ void Cellule::addParticule(Particule3D particule) {
     nbParticules++;
 }
 
+
+void Cellule::removeParticule(const Particule3D& p) {
+    std::cout << "Removing Particule: (" << p.getPos().getX() << ", " << p.getPos().getY() << ")\n";
+
+    std::cout << "Before removal, size: " << particules.size() << "\n";
+
+    auto new_end = std::remove(particules.begin(), particules.end(), p);
+    if (new_end != particules.end()) {
+        particules.erase(new_end, particules.end());
+        nbParticules = static_cast<int>(particules.size());
+    }
+
+    std::cout << "After removal, size: " << particules.size() << "\n";
+}
 void Cellule::removeParticule(int index) {
     particules.erase(particules.begin() + index);
 }
+
 
 void Cellule::clearParticules() {
     particules.clear();

@@ -34,7 +34,8 @@ class Cellule {
     Vector3D getCentre() const;
     void setParticules(std::vector<Particule3D> particules);
     void addParticule(Particule3D particule);
-    void removeParticule(int index);
+    void removeParticule(const Particule3D &p);
+    void removeParticule(int i);
     void clearParticules();
 };
 

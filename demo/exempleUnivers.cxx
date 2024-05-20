@@ -16,15 +16,15 @@
 
 int main() {
 
-    Univers univers = Univers(3, 300, 200, 0, 1, 1,2.5,0.0005, 1.95);
+    Univers univers = Univers(3, 140, 130, 0, 1, 1,2.5,0.005, 29.5,1,-12,0);
 
-    univers.initialiser2(20,20,20,80,Vector3D(-10,0,0),Vector3D(10,0,0));
+    univers.initialiser2(20,20,80,120,Vector3D(0,-10,0),Vector3D(0,0,0));
+
+
     std :: vector<Cellule> cell = univers.getCellules();
 
 
-
-
-std::cout << "Evolution" << std::endl;
+    std::cout << "Evolution" << std::endl;
     univers.evolution();
 
     std::cout << "FIN" << std::endl;
