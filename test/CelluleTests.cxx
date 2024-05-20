@@ -7,7 +7,7 @@
 TEST(Cellule, DefaultConstructor) {
     Cellule c;
     EXPECT_EQ(c.getNbParticules(), 0);
-    EXPECT_EQ(c.getParticules().size(), 0);
+    EXPECT_EQ((int)c.getParticules().size(), 0);
 }
 
 // Test the parameterized constructor
@@ -33,7 +33,7 @@ TEST(Cellule, ConstructorWithParticules) {
     EXPECT_EQ(id[0], 1);
     EXPECT_EQ(id[1], 2);
     EXPECT_EQ(c.getCentre(), centre);
-    EXPECT_EQ(c.getNbParticules(), expected_particules.size());
+    EXPECT_EQ(c.getNbParticules(), (int)expected_particules.size());
     EXPECT_EQ(c.getParticules(), expected_particules);
 }
 
@@ -49,7 +49,7 @@ TEST(Cellule, CopyConstructor) {
     EXPECT_EQ(c2.getId()[0], 1);
     EXPECT_EQ(c2.getId()[1], 2);
     EXPECT_EQ(c2.getCentre(), centre);
-    EXPECT_EQ(c2.getNbParticules(), particules.size());
+    EXPECT_EQ(c2.getNbParticules(),(int) particules.size());
     EXPECT_EQ(c2.getParticules(), particules);
 }
 
@@ -66,7 +66,7 @@ TEST(Cellule, CopyAssignmentOperator) {
     EXPECT_EQ(c2.getId()[0], 1);
     EXPECT_EQ(c2.getId()[1], 2);
     EXPECT_EQ(c2.getCentre(), centre);
-    EXPECT_EQ(c2.getNbParticules(), particules.size());
+    EXPECT_EQ(c2.getNbParticules(),(int) particules.size());
     EXPECT_EQ(c2.getParticules(), particules);
 }
 
@@ -76,7 +76,7 @@ TEST(Cellule, AddParticule) {
     Particule3D p(1, 1.0, 1, Vector3D(), Vector3D(), Vector3D());
     c.addParticule(p);
     EXPECT_EQ(c.getNbParticules(), 1);
-    EXPECT_EQ(c.getParticules().size(), 1);
+    EXPECT_EQ((int)c.getParticules().size(), 1);
     EXPECT_EQ(c.getParticules()[0], p);
 }
 
@@ -102,7 +102,7 @@ TEST(Cellule, SetParticules) {
     // print Cellule c to see if the particules are set
     std::cout << c.getParticules().size() << std::endl;
     std::vector<Particule3D> particules2 = c.getParticules();
-    for (int i = 0; i < particules.size(); i++) {
+    for (int i = 0; i <(int) particules.size(); i++) {
         std::cout << particules2[i].getId() << std::endl;
     }
     EXPECT_EQ(c.getParticules(), particules);

@@ -106,7 +106,7 @@ void Cellule::removeParticule(const Particule3D& p) {
 // Remove a particle by index
 void Cellule::removeParticule(int index) {
     try {
-        if (index < 0 || index >= particules.size()) {
+        if (index < 0 || index >= (int)particules.size()) {
             throw std::out_of_range("Index out of range.");
         }
         particules.erase(particules.begin() + index);

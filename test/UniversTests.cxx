@@ -12,14 +12,14 @@ TEST(Univers, Constructor) {
     EXPECT_EQ(u.getL2(), 10);
     EXPECT_EQ(u.getL3(), 0);
     EXPECT_EQ(u.getRCut(), 2.5f);
-    EXPECT_EQ(static_cast<unsigned long>(u.getNbParticules()), 0);
+    EXPECT_EQ(u.getNbParticules(), 0);
 }
 
 // Test the default constructor
 TEST(Univers, DefaultConstructor) {
     Univers u;
     EXPECT_EQ(u.getDimension(), 0);
-    EXPECT_EQ(static_cast<unsigned long>(u.getNbParticules()), 0);
+    EXPECT_EQ(u.getNbParticules(), 0);
 }
 
 // Test initialiser2 method
@@ -31,10 +31,10 @@ TEST(Univers, Initialize2) {
     u.initialiser(4, 4, 4, 16, Vector3D(0, 0, 0), Vector3D(0, 0, 0));
 
     // Check if the number of cells is as expected
-    EXPECT_EQ(static_cast<unsigned long>(u.getCellules().size()), 64); // 8x8 grid
+    EXPECT_EQ((int)u.getCellules().size(), 64); // 8x8 grid
 
     // Check if the number of particles is as expected
-    EXPECT_EQ(static_cast<unsigned long>(u.getNbParticules()), 4 * 4 + 4 * 16); // Number of red and blue particles
+    EXPECT_EQ(u.getNbParticules(), 4 * 4 + 4 * 16); // Number of red and blue particles
 }
 
 // Test assignParticule method
@@ -45,7 +45,7 @@ TEST(Univers, AssignParticule) {
     std::vector<Cellule> Cells = {Cellule(1, 1, Vector3D(1.0, 1.0, 0.0))};
     u.setCellules(Cells);
     u.assignParticule(p, 4);
-    EXPECT_EQ(static_cast<unsigned long>(u.getNbParticules()), 1);
+    EXPECT_EQ(u.getNbParticules(), 1);
     auto cells = u.getCellules();
     bool found = false;
     for (auto& cell : cells) {
@@ -62,8 +62,8 @@ TEST(Univers, GetSetMethods) {
     Univers u(2, 10, 10, 0, 2.5, 0.01, 1.0);
     std::vector<Cellule> cells = {Cellule(1, 1, Vector3D(1.0, 1.0, 0.0))};
     u.setCellules(cells);
-    EXPECT_EQ(static_cast<unsigned long>(u.getCellules().size()), 1);
-    EXPECT_EQ(static_cast<unsigned long>(u.getNbParticules()), 0); // No particles in the cell
+    EXPECT_EQ((int)u.getCellules().size(), 1);
+    EXPECT_EQ((int)u.getNbParticules(), 0); // No particles in the cell
 }
 
 // Test periodic boundary conditions

@@ -182,7 +182,7 @@ void Univers::initialiser(int dim1_rouge, int dim2_rouge, int dim1_bleue, int di
         }
 
 
-        if (nbParticules < particules_bleues.size() + particules_rouges.size()) {
+        if (nbParticules < (int)(particules_bleues.size() + particules_rouges.size())) {
             throw std::runtime_error("Error in cells: Number of particles is less than expected.");
         }
     } catch (const std::exception &e) {
@@ -257,7 +257,7 @@ void Univers::initialiserDemoCercle(int dim1_bleue, int dim2_bleue, float rayon_
         std::cout << "nCd2 : " << nCellsY << std::endl;
         std::cout << "nCellsX * nCd2 : " << nCellsX * nCellsY << std::endl;
         std::cout << "Number of particles: " << nbParticules << std::endl;
-        if (nbParticules < particules_bleues.size() + particules_rouges.size()) {
+        if (nbParticules < (int)(particules_bleues.size() + particules_rouges.size())) {
             throw std::runtime_error("Error in cells: Number of particles is less than expected.");
         }
     } catch (const std::exception &e) {
@@ -354,7 +354,7 @@ void Univers::assignParticule(const Particule3D& particule, int nCellsX) {
         int cellX = (int)(particule.getPos().getX() / rCut);
         int cellY = (int)(particule.getPos().getY() / rCut);
         int index = cellX + cellY * nCellsX;
-        if (index >= 0 && index < cellules.size()) {
+        if (index >= 0 && index < (int)cellules.size()) {
             cellules[index].addParticule(particule);
             nbParticules += 1;
         } else {
@@ -420,7 +420,7 @@ void Univers::writeVTKFile(std::string filename) {
                 }
             }
         }
-        std::cout << k << std::endl;
+
 
         file << std::endl;
         file << "        </DataArray>" << std::endl;
@@ -635,7 +635,6 @@ void Univers::periodicBC() {
         std::vector<Cellule> &cells = cellules;
         for (auto &cellule : cells) {
             // Verify if the cell is in the domain boundary
-            int *id = cellule.getId();
             std::vector<Particule3D> &part = cellule.getParticules();
             // Check if the particle is out of the domain
             for (auto &p : part) {
@@ -933,7 +932,7 @@ void Univers::evolution2D() {
                     }
 
                     int id = p.getId();
-                    if (id >= 0 && id < forcesOld.size()) {
+                    if (id >= 0 && id < (int)forcesOld.size()) {
                         forcesOld[id] = p.getForce();
                     }
                 }
@@ -1055,7 +1054,7 @@ void Univers::evolution3D() {
                     p.setPos(pos);
 
                     int id = p.getId();
-                    if (id >= 0 && id < forcesOld.size()) {
+                    if (id >= 0 && id < (int)forcesOld.size()) {
                         forcesOld[id] = p.getForce();
                     }
                 }
